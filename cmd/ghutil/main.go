@@ -63,7 +63,7 @@ func snapshotIssues(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	path := fmt.Sprintf("%s_%s_issues_%s.json", org, repo, time.Now().Format("20060102"))
+	path := fmt.Sprintf("%s_%s_issues_%s.json", org, repo, time.Now().Format("20060102_150405"))
 	file, err := os.Create(path)
 	if err != nil {
 		return err
@@ -96,10 +96,10 @@ func diffIssues(ctx *cli.Context) error {
 	fmt.Println("Changes:")
 	for _, diff := range diffs {
 		fmt.Println()
-		fmt.Printf("%s #%d\n", diff.Item.Title, diff.Item.Number)
-		fmt.Println(diff.Item.URL)
+		fmt.Printf("%s \033[0;33m#%d\033[0m\n", diff.Item.Title, diff.Item.Number)
+		fmt.Println("Link:", diff.Item.HTMLURL)
 		for _, change := range diff.Changes {
-			fmt.Printf("+-- %s:\t%s\t-> %s\n", change.Field, change.Old, change.New)
+			fmt.Printf("+-- %s: \033[0;31m%s\033[0m -> \033[0;32m%s\033[0m\n", change.Field, change.Old, change.New)
 		}
 	}
 	return nil

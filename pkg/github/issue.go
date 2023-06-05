@@ -68,7 +68,7 @@ func (m Milestone) String() string {
 
 // Issue is an abbreviated version of the GitHub issue type.
 type Issue struct {
-	URL       string     `json:"url"`
+	HTMLURL   string     `json:"html_url"`
 	Number    int        `json:"number"`
 	Title     string     `json:"title"`
 	Labels    []Label    `json:"labels"`
