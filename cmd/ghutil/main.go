@@ -25,9 +25,23 @@ var app = &cli.App{
 					ArgsUsage: "<org>/<repo>",
 					Usage:     "create a snapshot of issues",
 					Aliases:   []string{"i"},
+					Action:    snapshotIssues,
 				},
 			},
-			Action: snapshotIssues,
+		},
+		{
+			Name:    "diff",
+			Usage:   "diff two snapshots",
+			Aliases: []string{"d"},
+			Commands: []*cli.Command{
+				{
+					Name:      "issue",
+					ArgsUsage: "<old> <new>",
+					Usage:     "diff two snapshots of issues",
+					Aliases:   []string{"i"},
+					Action:    diffIssues,
+				},
+			},
 		},
 	},
 }
@@ -57,4 +71,36 @@ func snapshotIssues(ctx *cli.Context) error {
 	defer file.Close()
 
 	return json.NewEncoder(file).Encode(issues)
+}
+
+func diffIssues(ctx *cli.Context) error {
+	oldIssues, err := os.ReadFile(ctx.Args().Get(0))
+	if err != nil {
+		return err
+	}
+	newIssues, err := os.ReadFile(ctx.Args().Get(1))
+	if err != nil {
+		return err
+	}
+
+	diffs, err := github.DiffIssues(oldIssues, newIssues)
+	if err != nil {
+		return err
+	}
+
+	if len(diffs) == 0 {
+		fmt.Println("No changes")
+		return nil
+	}
+
+	fmt.Println("Changes:")
+	for _, diff := range diffs {
+		fmt.Println()
+		fmt.Printf("%s #%d\n", diff.Item.Title, diff.Item.Number)
+		fmt.Println(diff.Item.URL)
+		for _, change := range diff.Changes {
+			fmt.Printf("+-- %s:\t%s\t-> %s\n", change.Field, change.Old, change.New)
+		}
+	}
+	return nil
 }
