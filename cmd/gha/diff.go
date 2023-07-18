@@ -9,6 +9,7 @@ import (
 )
 
 var diffCommand = &cli.Command{
+	Name:      "diff",
 	Usage:     "diff two snapshots",
 	ArgsUsage: "<old> <new>",
 	Aliases:   []string{"d"},
