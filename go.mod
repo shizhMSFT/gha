@@ -2,7 +2,10 @@ module github.com/shizhMSFT/gha
 
 go 1.20
 
-require github.com/urfave/cli/v3 v3.0.0-alpha3
+require (
+	github.com/urfave/cli/v3 v3.0.0-alpha3
+	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
+)
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect

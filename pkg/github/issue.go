@@ -16,11 +16,11 @@ func (l Label) String() string {
 	return l.Name
 }
 
-type Assignee struct {
+type Account struct {
 	Login string `json:"login"`
 }
 
-func (a Assignee) String() string {
+func (a Account) String() string {
 	return a.Login
 }
 
@@ -41,10 +41,13 @@ type Issue struct {
 	HTMLURL     string       `json:"html_url"`
 	Number      int          `json:"number"`
 	Title       string       `json:"title"`
+	User        Account      `json:"user"`
 	Labels      []Label      `json:"labels"`
-	Assignees   []Assignee   `json:"assignees"`
+	Assignees   []Account    `json:"assignees"`
 	State       string       `json:"state"`
 	Milestone   Milestone    `json:"milestone"`
+	CreatedAt   time.Time    `json:"created_at"`
+	ClosedAt    *time.Time   `json:"closed_at"`
 	PullRequest *PullRequest `json:"pull_request,omitempty"`
 }
 
@@ -52,8 +55,12 @@ func (i Issue) String() string {
 	return fmt.Sprintf("%s #%d", i.Title, i.Number)
 }
 
-func (i Issue) IsPR() bool {
+func (i Issue) IsPullRequest() bool {
 	return i.PullRequest != nil
+}
+
+func (i Issue) Merged() bool {
+	return i.IsPullRequest() && i.PullRequest.MergedAt != nil
 }
 
 func ParseIssues(jsonBytes []byte) (map[int]Issue, error) {
