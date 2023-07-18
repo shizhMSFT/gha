@@ -26,6 +26,7 @@ func runSnapshot(ctx *cli.Context) error {
 	}
 
 	client := github.NewClient()
+	client.Token = os.Getenv("GITHUB_TOKEN")
 	client.PageEvent = func(page int) {
 		fmt.Printf("Fetching page %d...\n", page)
 	}
