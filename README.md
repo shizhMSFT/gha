@@ -1,2 +1,3 @@
-# ghutil
-GitHub Utility
+# GitHub Analyzer
+
+Analyze GitHub repositories and produce reports.

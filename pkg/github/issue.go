@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/shizhMSFT/ghutil/pkg/diff"
+	"github.com/shizhMSFT/gha/pkg/diff"
 )
 
 // OpenIssues returns all issues that are still open.

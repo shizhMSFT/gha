@@ -1,4 +1,4 @@
-module github.com/shizhMSFT/ghutil
+module github.com/shizhMSFT/gha
 
 go 1.20
 

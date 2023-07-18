@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shizhMSFT/ghutil/pkg/github"
+	"github.com/shizhMSFT/gha/pkg/github"
 	"github.com/urfave/cli/v3"
 )
 
 var app = &cli.App{
-	Name:  "ghutil",
-	Usage: "GitHub utility",
+	Name:  "gha",
+	Usage: "GitHub Analyzer",
 	Commands: []*cli.Command{
 		{
 			Name:    "snapshot",
