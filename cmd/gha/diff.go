@@ -39,15 +39,15 @@ func runDiff(ctx *cli.Context) error {
 		return err
 	}
 
-	fmt.Println(oldPath, "->", newPath)
+	fmt.Printf("%s -> %s: ", oldPath, newPath)
 
 	diffs := github.DiffIssues(oldIssues, newIssues)
 	if len(diffs) == 0 {
-		fmt.Println("No changes")
+		fmt.Println("no change")
 		return nil
 	}
 
-	fmt.Println("Changes:")
+	fmt.Println(len(diffs), "changes:")
 	for _, diff := range diffs {
 		fmt.Println()
 		fmt.Printf("%s \033[0;33m#%d\033[0m\n", diff.Item.Title, diff.Item.Number)
