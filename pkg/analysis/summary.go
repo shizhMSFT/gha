@@ -70,6 +70,9 @@ func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
 		Authors:           make(map[string]*RepositorySummary),
 	}
 	for _, issue := range issues {
+		if (!issue.CreatedAt.IsZero() && issue.CreatedAt.Before(start)) || (!issue.ClosedAt.IsZero() && issue.ClosedAt.After(end)) {
+			continue
+		}
 		author := issue.User.Login
 		authorSummary := summary.Authors[author]
 		if authorSummary == nil {
