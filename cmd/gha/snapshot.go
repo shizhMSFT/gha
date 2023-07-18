@@ -28,12 +28,13 @@ func runSnapshot(ctx *cli.Context) error {
 	client := github.NewClient()
 	client.Token = os.Getenv("GITHUB_TOKEN")
 	client.PageEvent = func(page int) {
-		fmt.Printf("Fetching page %d...\n", page)
+		fmt.Printf(".")
 	}
 	snapshot, n, err := client.Snapshot(ctx.Context, org, repo)
 	if err != nil {
 		return err
 	}
+	fmt.Println()
 	fmt.Println("Fetched", n, "issues and pull requests")
 
 	path := fmt.Sprintf("%s_%s_%s.json", org, repo, time.Now().Format("20060102_150405"))
