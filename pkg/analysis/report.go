@@ -67,12 +67,11 @@ func NewSummary() *Summary {
 	}
 }
 
-func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
+func Summarize(issues map[int]github.Issue, timeFrame TimeFrame) *Summary {
 	summary := NewSummary()
-	summary.Start = start
-	summary.End = end
+	summary.TimeFrame = timeFrame
 	for _, issue := range issues {
-		if (!start.IsZero() && issue.CreatedAt.Before(start)) || (!end.IsZero() && issue.CreatedAt.After(end)) {
+		if !timeFrame.Contains(issue.CreatedAt) {
 			continue
 		}
 		author := issue.User.Login
@@ -139,18 +138,15 @@ type Report struct {
 	Summaries map[string]*Summary
 }
 
-func NewReport(start, end time.Time) *Report {
+func NewReport(timeFrame TimeFrame) *Report {
 	return &Report{
-		TimeFrame: TimeFrame{
-			Start: start,
-			End:   end,
-		},
+		TimeFrame: timeFrame,
 		Summaries: make(map[string]*Summary),
 	}
 }
 
 func (r *Report) Summarize(name string, issues map[int]github.Issue) *Summary {
-	summary := Summarize(issues, r.Start, r.End)
+	summary := Summarize(issues, r.TimeFrame)
 	r.Summaries[name] = summary
 	return summary
 }

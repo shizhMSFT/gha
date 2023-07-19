@@ -1,8 +1,6 @@
 package analysis
 
 import (
-	"time"
-
 	"github.com/shizhMSFT/gha/pkg/container/set"
 	"github.com/shizhMSFT/gha/pkg/github"
 )
@@ -27,13 +25,12 @@ func (s *PullRequestReviewSummary) ReviewCount() map[string]int {
 	return counts
 }
 
-func SummarizePullRequestReviews(reviews map[int][]github.PullRequestReview, start, end time.Time) *PullRequestReviewSummary {
+func SummarizePullRequestReviews(reviews map[int][]github.PullRequestReview, timeFrame TimeFrame) *PullRequestReviewSummary {
 	summary := NewPullRequestReviewSummary()
-	summary.Start = start
-	summary.End = end
+	summary.TimeFrame = timeFrame
 	for number, reviews := range reviews {
 		for _, review := range reviews {
-			if (!start.IsZero() && review.SubmittedAt.Before(start)) || (!end.IsZero() && review.SubmittedAt.After(end)) {
+			if !timeFrame.Contains(review.SubmittedAt) {
 				continue
 			}
 			reviewer := review.User.Login
@@ -55,7 +52,7 @@ type PullRequestReviewReport struct {
 }
 
 func (r *PullRequestReviewReport) Summarize(name string, reviews map[int][]github.PullRequestReview) *PullRequestReviewSummary {
-	summary := SummarizePullRequestReviews(reviews, r.Start, r.End)
+	summary := SummarizePullRequestReviews(reviews, r.TimeFrame)
 	r.Summaries[name] = summary
 	return summary
 }

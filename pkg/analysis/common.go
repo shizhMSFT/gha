@@ -19,3 +19,7 @@ func (tf *TimeFrame) Union(other TimeFrame) {
 		}
 	}
 }
+
+func (tf *TimeFrame) Contains(t time.Time) bool {
+	return (tf.Start.IsZero() || !t.Before(tf.Start)) && (tf.End.IsZero() || !t.After(tf.End))
+}

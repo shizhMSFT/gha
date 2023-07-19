@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -46,32 +47,32 @@ var reportCommand = &cli.Command{
 
 func runReport(ctx *cli.Context) error {
 	if ctx.NArg() == 0 {
-		return fmt.Errorf("invalid number of arguments")
+		return errors.New("no snapshot files specified")
 	}
 
 	// parse flags
-	var start, end time.Time
+	var timeFrame analysis.TimeFrame
 	if ago := ctx.Int("ago"); ago > 0 {
-		start = time.Now().UTC().AddDate(0, 0, int(-ago))
+		timeFrame.Start = time.Now().UTC().AddDate(0, 0, int(-ago))
 	}
 	if date := ctx.Value("start-date").(time.Time); !date.IsZero() {
-		start = date
+		timeFrame.Start = date
 	}
 	if date := ctx.Value("end-date").(time.Time); !date.IsZero() {
-		end = date
+		timeFrame.End = date
 	}
 	includeContributors := ctx.Bool("contributors")
 
 	// generate report
 	fmt.Println("GitHub Analysis Report")
 	fmt.Println("======================")
-	if !start.IsZero() {
-		fmt.Printf("- Start Date: `%s`\n", start.Format(time.DateTime))
+	if !timeFrame.Start.IsZero() {
+		fmt.Printf("- Start Date: `%s`\n", timeFrame.Start.Format(time.DateTime))
 	}
-	if !end.IsZero() {
-		fmt.Printf("- End Date: `%s`\n", end.Format(time.DateTime))
+	if !timeFrame.End.IsZero() {
+		fmt.Printf("- End Date: `%s`\n", timeFrame.End.Format(time.DateTime))
 	}
-	report := analysis.NewReport(start, end)
+	report := analysis.NewReport(timeFrame)
 	for _, path := range ctx.Args().Slice() {
 		fmt.Println()
 		fmt.Println("##", path)
