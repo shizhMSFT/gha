@@ -8,8 +8,9 @@ import (
 )
 
 var app = &cli.App{
-	Name:  "gha",
-	Usage: "GitHub Analyzer",
+	Name:    "gha",
+	Usage:   "GitHub Analyzer",
+	Version: "0.1.0",
 	Commands: []*cli.Command{
 		snapshotCommand,
 		diffCommand,
