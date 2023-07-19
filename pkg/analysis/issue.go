@@ -55,9 +55,7 @@ func (s *RepositorySummary) Combine(other *RepositorySummary) {
 
 type Summary struct {
 	*RepositorySummary
-
-	Start time.Time
-	End   time.Time
+	TimeFrame
 
 	Authors map[string]*RepositorySummary
 }
@@ -139,4 +137,34 @@ func (s *Summary) Combine(other *Summary) {
 		}
 		summary.Combine(other)
 	}
+}
+
+type Report struct {
+	TimeFrame
+
+	Summaries map[string]*Summary
+}
+
+func NewReport(start, end time.Time) *Report {
+	return &Report{
+		TimeFrame: TimeFrame{
+			Start: start,
+			End:   end,
+		},
+		Summaries: make(map[string]*Summary),
+	}
+}
+
+func (r *Report) Summarize(name string, issues map[int]github.Issue) *Summary {
+	summary := Summarize(issues, r.Start, r.End)
+	r.Summaries[name] = summary
+	return summary
+}
+
+func (r *Report) Abstract() *Summary {
+	abstract := NewSummary()
+	for _, summary := range r.Summaries {
+		abstract.Combine(summary)
+	}
+	return abstract
 }
