@@ -46,7 +46,7 @@ func runReport(ctx *cli.Context) error {
 	// parse flags
 	var start, end time.Time
 	if ago := ctx.Int("ago"); ago > 0 {
-		start = time.Now().UTC().AddDate(0, 0, -ago)
+		start = time.Now().UTC().AddDate(0, 0, int(-ago))
 	}
 	if date := ctx.Timestamp("start-date"); !date.IsZero() {
 		start = *date
