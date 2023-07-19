@@ -18,8 +18,19 @@ var reportCommand = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.IntFlag{
 			Name:     "ago",
-			Aliases:  []string{"a"},
 			Usage:    "only include snapshots that are at least `DAYS` old",
+			OnlyOnce: true,
+		},
+		&cli.TimestampFlag{
+			Name:     "start-date",
+			Usage:    "only include snapshots that were created after `DATE`",
+			Config:   cli.TimestampConfig{Layout: time.DateOnly},
+			OnlyOnce: true,
+		},
+		&cli.TimestampFlag{
+			Name:     "end-date",
+			Usage:    "only include snapshots that were created before `DATE`",
+			Config:   cli.TimestampConfig{Layout: time.DateOnly},
 			OnlyOnce: true,
 		},
 	},
@@ -31,17 +42,24 @@ func runReport(ctx *cli.Context) error {
 		return fmt.Errorf("invalid number of arguments")
 	}
 
+	// parse flags
 	var start, end time.Time
 	if ago := ctx.Int("ago"); ago > 0 {
-		end = time.Now().UTC()
-		start = end.AddDate(0, 0, -ago)
-		fmt.Println("Time frame:", start.Format(time.DateTime), "->", end.Format(time.DateTime))
-	} else {
-		fmt.Println("Time frame: all")
+		start = time.Now().UTC().AddDate(0, 0, -ago)
 	}
+	if date := ctx.Timestamp("start-date"); !date.IsZero() {
+		start = *date
+	}
+	if date := ctx.Timestamp("end-date"); !date.IsZero() {
+		end = *date
+	}
+
+	// generate report
+	fmt.Println("GitHub Analysis Report")
+	fmt.Println("======================")
 	report := analysis.NewReport(start, end)
 	for _, path := range ctx.Args().Slice() {
-		fmt.Println(">>>", path)
+		fmt.Println("##", path)
 		snapshotJSON, err := os.ReadFile(path)
 		if err != nil {
 			return err
@@ -52,7 +70,7 @@ func runReport(ctx *cli.Context) error {
 		}
 		printSummary(report.Summarize(path, snapshot))
 	}
-	fmt.Println("<<< Abstract")
+	fmt.Println("## Summary")
 	printSummary(report.Abstract())
 	return nil
 }
