@@ -17,6 +17,7 @@ var app = &cli.Command{
 		snapshotCommand,
 		diffCommand,
 		reportCommand,
+		pullRequestReviewCommand,
 	},
 }
 

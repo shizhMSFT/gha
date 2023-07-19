@@ -66,12 +66,7 @@ func runReport(ctx *cli.Context) error {
 	// generate report
 	fmt.Println("GitHub Analysis Report")
 	fmt.Println("======================")
-	if !timeFrame.Start.IsZero() {
-		fmt.Printf("- Start Date: `%s`\n", timeFrame.Start.Format(time.DateTime))
-	}
-	if !timeFrame.End.IsZero() {
-		fmt.Printf("- End Date: `%s`\n", timeFrame.End.Format(time.DateTime))
-	}
+	printTimeFrame(timeFrame)
 	report := analysis.NewReport(timeFrame)
 	for _, path := range ctx.Args().Slice() {
 		fmt.Println()
@@ -87,9 +82,18 @@ func runReport(ctx *cli.Context) error {
 		printSummary(report.Summarize(path, snapshot), includeContributors)
 	}
 	fmt.Println()
-	fmt.Println("## Summary")
+	fmt.Println("## Overall")
 	printSummary(report.Abstract(), includeContributors)
 	return nil
+}
+
+func printTimeFrame(timeFrame analysis.TimeFrame) {
+	if !timeFrame.Start.IsZero() {
+		fmt.Printf("- Start Date: `%s`\n", timeFrame.Start.Format(time.DateTime))
+	}
+	if !timeFrame.End.IsZero() {
+		fmt.Printf("- End Date: `%s`\n", timeFrame.End.Format(time.DateTime))
+	}
 }
 
 func printSummary(summary *analysis.Summary, includeContributors bool) {
