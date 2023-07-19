@@ -10,7 +10,7 @@ type IssueSummary struct {
 	Total     int
 	Open      int
 	Closed    int
-	Durations []time.Duration
+	Durations []time.Duration // time to close
 }
 
 func (s *IssueSummary) Combine(other *IssueSummary) {
@@ -25,7 +25,7 @@ type PullRequestSummary struct {
 	Open      int
 	Closed    int
 	Merged    int
-	Durations []time.Duration
+	Durations []time.Duration // time to merge
 }
 
 func (s *PullRequestSummary) Combine(other *PullRequestSummary) {
@@ -91,13 +91,13 @@ func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
 				if issue.Merged() {
 					summary.PullRequest.Merged++
 					authorSummary.PullRequest.Merged++
+					summary.PullRequest.Durations = append(summary.PullRequest.Durations, duration)
+					authorSummary.PullRequest.Durations = append(authorSummary.PullRequest.Durations, duration)
 				} else {
 					summary.PullRequest.Closed++
 					authorSummary.PullRequest.Closed++
 				}
 			}
-			summary.PullRequest.Durations = append(summary.PullRequest.Durations, duration)
-			authorSummary.PullRequest.Durations = append(authorSummary.PullRequest.Durations, duration)
 		} else {
 			summary.Issue.Total++
 			authorSummary.Issue.Total++
@@ -108,9 +108,9 @@ func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
 			case "closed":
 				summary.Issue.Closed++
 				authorSummary.Issue.Closed++
+				summary.Issue.Durations = append(summary.Issue.Durations, duration)
+				authorSummary.Issue.Durations = append(authorSummary.Issue.Durations, duration)
 			}
-			summary.Issue.Durations = append(summary.Issue.Durations, duration)
-			authorSummary.Issue.Durations = append(authorSummary.Issue.Durations, duration)
 		}
 	}
 	return summary
