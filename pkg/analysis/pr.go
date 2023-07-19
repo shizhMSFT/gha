@@ -51,6 +51,13 @@ type PullRequestReviewReport struct {
 	Summaries map[string]*PullRequestReviewSummary
 }
 
+func NewPullRequestReviewReport(timeFrame TimeFrame) *PullRequestReviewReport {
+	return &PullRequestReviewReport{
+		TimeFrame: timeFrame,
+		Summaries: make(map[string]*PullRequestReviewSummary),
+	}
+}
+
 func (r *PullRequestReviewReport) Summarize(name string, reviews map[int][]github.PullRequestReview) *PullRequestReviewSummary {
 	summary := SummarizePullRequestReviews(reviews, r.TimeFrame)
 	r.Summaries[name] = summary
