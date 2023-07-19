@@ -81,9 +81,11 @@ func runReport(ctx *cli.Context) error {
 		}
 		printSummary(report.Summarize(path, snapshot), includeContributors)
 	}
-	fmt.Println()
-	fmt.Println("## Overall")
-	printSummary(report.Abstract(), includeContributors)
+	if ctx.NArg() > 1 {
+		fmt.Println()
+		fmt.Println("## Overall")
+		printSummary(report.Abstract(), includeContributors)
+	}
 	return nil
 }
 

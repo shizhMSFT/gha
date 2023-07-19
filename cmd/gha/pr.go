@@ -75,9 +75,11 @@ func runPullRequestReview(ctx *cli.Context) error {
 		}
 		printPullRequestReviewCount(report.Summarize(path, snapshot).ReviewCount())
 	}
-	fmt.Println()
-	fmt.Println("## Overall")
-	printPullRequestReviewCount(report.ReviewCount())
+	if ctx.NArg() > 1 {
+		fmt.Println()
+		fmt.Println("## Overall")
+		printPullRequestReviewCount(report.ReviewCount())
+	}
 	return nil
 }
 

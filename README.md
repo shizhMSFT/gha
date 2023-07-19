@@ -72,34 +72,6 @@ Pull Requests
   - 90th percentile: 8d 4h
   - 95th percentile: 9d 17h
   - 99th percentile: 15d 15h
-
-## Overall
-Issues
-- Total: 43
-  - Open: 24
-  - Closed: 19
-- Time to close:
-  - Min: 43s
-  - Max: 1mo 12d
-  - Mean: 6d 8h
-  - Median: 3d 6h
-  - 90th percentile: 10d 10h
-  - 95th percentile: 12d 19h
-  - 99th percentile: 12d 19h
-
-Pull Requests
-- Total: 64
-  - Open: 12
-  - Closed: 13
-  - Merged: 39
-- Time to merge:
-  - Min: 16m 50s
-  - Max: 25d 21h
-  - Mean: 3d 22h
-  - Median: 2d 18h
-  - 90th percentile: 8d 4h
-  - 95th percentile: 9d 17h
-  - 99th percentile: 15d 15h
 $ gha pr-review --ago 90 notaryproject_notation_20230719_234809_reviews.json
 Pull Request Review Count
 ==========================
@@ -129,29 +101,4 @@ Pull Request Review Count
 | ningziwen       |     1 | ` `                                                  |
 | qweeah          |     1 | ` `                                                  |
 | byronchien      |     1 | ` `                                                  |
-
-## Overall
-
-| Reviewer        | Count |                                                      |
-|-----------------|-------|------------------------------------------------------|
-| priteshbandi    |    50 | `                                                  ` |
-| shizhMSFT       |    46 | `                                              `     |
-| JeyJeyGao       |    30 | `                              `                     |
-| Two-Hearts      |    29 | `                             `                      |
-| FeynmanZhou     |     9 | `         `                                          |
-| yizha1          |     8 | `        `                                           |
-| patrickzheng200 |     6 | `      `                                             |
-| rgnote          |     5 | `     `                                              |
-| gokarnm         |     4 | `    `                                               |
-| sajayantony     |     3 | `   `                                                |
-| Wwwsylvia       |     3 | `   `                                                |
-| zr-msft         |     2 | `  `                                                 |
-| vaninrao10      |     1 | ` `                                                  |
-| toddysm         |     1 | ` `                                                  |
-| ningziwen       |     1 | ` `                                                  |
-| wangxiaoxuan273 |     1 | ` `                                                  |
-| duffney         |     1 | ` `                                                  |
-| tungbq          |     1 | ` `                                                  |
-| byronchien      |     1 | ` `                                                  |
-| qweeah          |     1 | ` `                                                  |
 ```
