@@ -36,8 +36,8 @@ var reportCommand = &cli.Command{
 			OnlyOnce: true,
 		},
 		&cli.BoolFlag{
-			Name:     "exclude-contributors",
-			Usage:    "exclude contributors from the report",
+			Name:     "contributors",
+			Usage:    "include contributors from the report",
 			OnlyOnce: true,
 		},
 	},
@@ -60,7 +60,7 @@ func runReport(ctx *cli.Context) error {
 	if date := ctx.Value("end-date").(time.Time); !date.IsZero() {
 		end = date
 	}
-	excludeContributors := ctx.Bool("exclude-contributors")
+	includeContributors := ctx.Bool("contributors")
 
 	// generate report
 	fmt.Println("GitHub Analysis Report")
@@ -83,26 +83,25 @@ func runReport(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		printSummary(report.Summarize(path, snapshot), excludeContributors)
+		printSummary(report.Summarize(path, snapshot), includeContributors)
 	}
 	fmt.Println()
 	fmt.Println("## Summary")
-	printSummary(report.Abstract(), excludeContributors)
+	printSummary(report.Abstract(), includeContributors)
 	return nil
 }
 
-func printSummary(summary *analysis.Summary, excludeContributors bool) {
+func printSummary(summary *analysis.Summary, includeContributors bool) {
 	printRepositorySummary(summary.RepositorySummary)
 
-	if excludeContributors {
-		return
-	}
-	fmt.Println()
-	fmt.Println("### Contributors")
-	for name, summary := range summary.Authors {
+	if includeContributors {
 		fmt.Println()
-		fmt.Println("####", name)
-		printRepositorySummary(summary)
+		fmt.Println("### Contributors")
+		for name, summary := range summary.Authors {
+			fmt.Println()
+			fmt.Println("####", name)
+			printRepositorySummary(summary)
+		}
 	}
 }
 
@@ -119,9 +118,9 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 		fmt.Println("  - Max:", formatDuration(math.Max(issue.Durations)))
 		fmt.Println("  - Mean:", formatDuration(math.Mean(issue.Durations)))
 		fmt.Println("  - Median:", formatDuration(math.Median(issue.Durations)))
-		fmt.Println("  - 90th Percentile:", formatDuration(math.Percentile(issue.Durations, 0.9)))
-		fmt.Println("  - 95th Percentile:", formatDuration(math.Percentile(issue.Durations, 0.95)))
-		fmt.Println("  - 99th Percentile:", formatDuration(math.Percentile(issue.Durations, 0.99)))
+		fmt.Println("  - 90th percentile:", formatDuration(math.Percentile(issue.Durations, 0.9)))
+		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(issue.Durations, 0.95)))
+		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(issue.Durations, 0.99)))
 	}
 
 	fmt.Println()
@@ -139,9 +138,9 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 		fmt.Println("  - Max:", formatDuration(math.Max(pr.Durations)))
 		fmt.Println("  - Mean:", formatDuration(math.Mean(pr.Durations)))
 		fmt.Println("  - Median:", formatDuration(math.Median(pr.Durations)))
-		fmt.Println("  - 90th Percentile:", formatDuration(math.Percentile(pr.Durations, 0.9)))
-		fmt.Println("  - 95th Percentile:", formatDuration(math.Percentile(pr.Durations, 0.95)))
-		fmt.Println("  - 99th Percentile:", formatDuration(math.Percentile(pr.Durations, 0.99)))
+		fmt.Println("  - 90th percentile:", formatDuration(math.Percentile(pr.Durations, 0.9)))
+		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(pr.Durations, 0.95)))
+		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(pr.Durations, 0.99)))
 	}
 }
 
