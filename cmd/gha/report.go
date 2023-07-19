@@ -35,6 +35,11 @@ var reportCommand = &cli.Command{
 			Config:   cli.TimestampConfig{Layout: time.DateOnly},
 			OnlyOnce: true,
 		},
+		&cli.BoolFlag{
+			Name:     "exclude-contributors",
+			Usage:    "exclude contributors from the report",
+			OnlyOnce: true,
+		},
 	},
 	Action: runReport,
 }
@@ -55,6 +60,7 @@ func runReport(ctx *cli.Context) error {
 	if date := ctx.Value("end-date").(time.Time); !date.IsZero() {
 		end = date
 	}
+	excludeContributors := ctx.Bool("exclude-contributors")
 
 	// generate report
 	fmt.Println("GitHub Analysis Report")
@@ -77,17 +83,20 @@ func runReport(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		printSummary(report.Summarize(path, snapshot))
+		printSummary(report.Summarize(path, snapshot), excludeContributors)
 	}
 	fmt.Println()
 	fmt.Println("## Summary")
-	printSummary(report.Abstract())
+	printSummary(report.Abstract(), excludeContributors)
 	return nil
 }
 
-func printSummary(summary *analysis.Summary) {
+func printSummary(summary *analysis.Summary, excludeContributors bool) {
 	printRepositorySummary(summary.RepositorySummary)
 
+	if excludeContributors {
+		return
+	}
 	fmt.Println()
 	fmt.Println("### Contributors")
 	for name, summary := range summary.Authors {
