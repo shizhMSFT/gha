@@ -13,7 +13,7 @@ type IssueSummary struct {
 	Durations []time.Duration // time to close
 }
 
-func (s *IssueSummary) Combine(other *IssueSummary) {
+func (s *IssueSummary) Union(other *IssueSummary) {
 	s.Total += other.Total
 	s.Open += other.Open
 	s.Closed += other.Closed
@@ -28,7 +28,7 @@ type PullRequestSummary struct {
 	Durations []time.Duration // time to merge
 }
 
-func (s *PullRequestSummary) Combine(other *PullRequestSummary) {
+func (s *PullRequestSummary) Union(other *PullRequestSummary) {
 	s.Total += other.Total
 	s.Open += other.Open
 	s.Closed += other.Closed
@@ -48,9 +48,9 @@ func NewRepositorySummary() *RepositorySummary {
 	}
 }
 
-func (s *RepositorySummary) Combine(other *RepositorySummary) {
-	s.Issue.Combine(other.Issue)
-	s.PullRequest.Combine(other.PullRequest)
+func (s *RepositorySummary) Union(other *RepositorySummary) {
+	s.Issue.Union(other.Issue)
+	s.PullRequest.Union(other.PullRequest)
 }
 
 type Summary struct {
@@ -119,15 +119,9 @@ func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
 	return summary
 }
 
-func (s *Summary) Combine(other *Summary) {
-	s.RepositorySummary.Combine(other.RepositorySummary)
-
-	if s.Start.After(other.Start) {
-		s.Start = other.Start
-	}
-	if s.End.Before(other.End) {
-		s.End = other.End
-	}
+func (s *Summary) Union(other *Summary) {
+	s.RepositorySummary.Union(other.RepositorySummary)
+	s.TimeFrame.Union(other.TimeFrame)
 
 	for name, other := range other.Authors {
 		summary := s.Authors[name]
@@ -135,7 +129,7 @@ func (s *Summary) Combine(other *Summary) {
 			summary = NewRepositorySummary()
 			s.Authors[name] = summary
 		}
-		summary.Combine(other)
+		summary.Union(other)
 	}
 }
 
@@ -164,7 +158,7 @@ func (r *Report) Summarize(name string, issues map[int]github.Issue) *Summary {
 func (r *Report) Abstract() *Summary {
 	abstract := NewSummary()
 	for _, summary := range r.Summaries {
-		abstract.Combine(summary)
+		abstract.Union(summary)
 	}
 	return abstract
 }
