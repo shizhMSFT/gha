@@ -106,13 +106,13 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 	if len(issue.Durations) > 0 {
 		sort.Sort(issue.Durations)
 		fmt.Println("- Time to close:")
-		fmt.Println("  - Min:", math.Min(issue.Durations))
-		fmt.Println("  - Max:", math.Max(issue.Durations))
-		fmt.Println("  - Mean:", math.Mean(issue.Durations))
-		fmt.Println("  - Median:", math.Median(issue.Durations))
-		fmt.Println("  - 90th Percentile:", math.Percentile(issue.Durations, 0.9))
-		fmt.Println("  - 95th Percentile:", math.Percentile(issue.Durations, 0.95))
-		fmt.Println("  - 99th Percentile:", math.Percentile(issue.Durations, 0.99))
+		fmt.Println("  - Min:", formatDuration(math.Min(issue.Durations)))
+		fmt.Println("  - Max:", formatDuration(math.Max(issue.Durations)))
+		fmt.Println("  - Mean:", formatDuration(math.Mean(issue.Durations)))
+		fmt.Println("  - Median:", formatDuration(math.Median(issue.Durations)))
+		fmt.Println("  - 90th Percentile:", formatDuration(math.Percentile(issue.Durations, 0.9)))
+		fmt.Println("  - 95th Percentile:", formatDuration(math.Percentile(issue.Durations, 0.95)))
+		fmt.Println("  - 99th Percentile:", formatDuration(math.Percentile(issue.Durations, 0.99)))
 	}
 
 	fmt.Println()
@@ -126,12 +126,52 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 	if len(pr.Durations) > 0 {
 		sort.Sort(pr.Durations)
 		fmt.Println("- Time to merge:")
-		fmt.Println("  - Min:", math.Min(pr.Durations))
-		fmt.Println("  - Max:", math.Max(pr.Durations))
-		fmt.Println("  - Mean:", math.Mean(pr.Durations))
-		fmt.Println("  - Median:", math.Median(pr.Durations))
-		fmt.Println("  - 90th Percentile:", math.Percentile(pr.Durations, 0.9))
-		fmt.Println("  - 95th Percentile:", math.Percentile(pr.Durations, 0.95))
-		fmt.Println("  - 99th Percentile:", math.Percentile(pr.Durations, 0.99))
+		fmt.Println("  - Min:", formatDuration(math.Min(pr.Durations)))
+		fmt.Println("  - Max:", formatDuration(math.Max(pr.Durations)))
+		fmt.Println("  - Mean:", formatDuration(math.Mean(pr.Durations)))
+		fmt.Println("  - Median:", formatDuration(math.Median(pr.Durations)))
+		fmt.Println("  - 90th Percentile:", formatDuration(math.Percentile(pr.Durations, 0.9)))
+		fmt.Println("  - 95th Percentile:", formatDuration(math.Percentile(pr.Durations, 0.95)))
+		fmt.Println("  - 99th Percentile:", formatDuration(math.Percentile(pr.Durations, 0.99)))
 	}
+}
+
+func formatDuration(d time.Duration) string {
+	seconds := d / time.Second
+	minutes, seconds := seconds/60, seconds%60
+	hours, minutes := minutes/60, minutes%60
+	days, hours := hours/24, hours%24
+	months, days := days/30, days%30
+	years, months := months/12, months%12
+	if years > 0 {
+		if months > 0 {
+			return fmt.Sprintf("%dy %dm", years, months)
+		}
+		return fmt.Sprintf("%dy", years)
+	}
+	if months > 0 {
+		if days > 0 {
+			return fmt.Sprintf("%dmo %dd", months, days)
+		}
+		return fmt.Sprintf("%dmo", months)
+	}
+	if days > 0 {
+		if hours > 0 {
+			return fmt.Sprintf("%dd %dh", days, hours)
+		}
+		return fmt.Sprintf("%dd", days)
+	}
+	if hours > 0 {
+		if minutes > 0 {
+			return fmt.Sprintf("%dh %dm", hours, minutes)
+		}
+		return fmt.Sprintf("%dh", hours)
+	}
+	if minutes > 0 {
+		if seconds > 0 {
+			return fmt.Sprintf("%dm %ds", minutes, seconds)
+		}
+		return fmt.Sprintf("%dm", minutes)
+	}
+	return fmt.Sprintf("%ds", seconds)
 }
