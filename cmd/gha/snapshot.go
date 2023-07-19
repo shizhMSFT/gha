@@ -56,7 +56,7 @@ func runSnapshot(ctx *cli.Context) error {
 	fmt.Println()
 	fmt.Println("Fetched", n, "issues and pull requests")
 
-	path := fmt.Sprintf("%s_%s_%s_snapshot.json", org, repo, time.Now().Format("20060102_150405"))
+	path := fmt.Sprintf("%s_%s_%s_snapshot.json", org, repo, time.Now().UTC().Format("20060102_150405"))
 	if err := os.WriteFile(path, snapshot, 0644); err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func snapshotPullRequestReviews(ctx *cli.Context, org string, repo string, clien
 	fmt.Println(strings.Repeat(" ", 50-count%50), "100.00%")
 
 	// save reviews
-	path := fmt.Sprintf("%s_%s_%s_reviews.json", org, repo, time.Now().Format("20060102_150405"))
+	path := fmt.Sprintf("%s_%s_%s_reviews.json", org, repo, time.Now().UTC().Format("20060102_150405"))
 	reviewsJSON, err := json.Marshal(reviews)
 	if err != nil {
 		return err
