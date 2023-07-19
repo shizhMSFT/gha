@@ -28,7 +28,7 @@ func (r *Report) Summarize(name string, issues map[int]github.Issue) *Summary {
 }
 
 func (r *Report) Abstract() *Summary {
-	abstract := new(Summary)
+	abstract := NewSummary()
 	for _, summary := range r.Summaries {
 		abstract.Combine(summary)
 	}

@@ -62,15 +62,19 @@ type Summary struct {
 	Authors map[string]*RepositorySummary
 }
 
-func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
-	summary := &Summary{
+func NewSummary() *Summary {
+	return &Summary{
 		RepositorySummary: NewRepositorySummary(),
-		Start:             start,
-		End:               end,
 		Authors:           make(map[string]*RepositorySummary),
 	}
+}
+
+func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
+	summary := NewSummary()
+	summary.Start = start
+	summary.End = end
 	for _, issue := range issues {
-		if (!issue.CreatedAt.IsZero() && issue.CreatedAt.Before(start)) || (!issue.ClosedAt.IsZero() && issue.ClosedAt.After(end)) {
+		if (!start.IsZero() && issue.CreatedAt.Before(start)) || (!end.IsZero() && issue.ClosedAt != nil && issue.ClosedAt.After(end)) {
 			continue
 		}
 		author := issue.User.Login
@@ -79,7 +83,6 @@ func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
 			authorSummary = NewRepositorySummary()
 			summary.Authors[author] = authorSummary
 		}
-		duration := issue.ClosedAt.Sub(issue.CreatedAt)
 		if issue.IsPullRequest() {
 			summary.PullRequest.Total++
 			authorSummary.PullRequest.Total++
@@ -91,6 +94,7 @@ func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
 				if issue.Merged() {
 					summary.PullRequest.Merged++
 					authorSummary.PullRequest.Merged++
+					duration := issue.ClosedAt.Sub(issue.CreatedAt)
 					summary.PullRequest.Durations = append(summary.PullRequest.Durations, duration)
 					authorSummary.PullRequest.Durations = append(authorSummary.PullRequest.Durations, duration)
 				} else {
@@ -108,6 +112,7 @@ func Summarize(issues map[int]github.Issue, start, end time.Time) *Summary {
 			case "closed":
 				summary.Issue.Closed++
 				authorSummary.Issue.Closed++
+				duration := issue.ClosedAt.Sub(issue.CreatedAt)
 				summary.Issue.Durations = append(summary.Issue.Durations, duration)
 				authorSummary.Issue.Durations = append(authorSummary.Issue.Durations, duration)
 			}

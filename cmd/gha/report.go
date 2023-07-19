@@ -8,6 +8,7 @@ import (
 	"github.com/shizhMSFT/gha/pkg/analysis"
 	"github.com/shizhMSFT/gha/pkg/github"
 	"github.com/shizhMSFT/gha/pkg/math"
+	"github.com/shizhMSFT/gha/pkg/sort"
 	"github.com/urfave/cli/v3"
 )
 
@@ -48,11 +49,11 @@ func runReport(ctx *cli.Context) error {
 	if ago := ctx.Int("ago"); ago > 0 {
 		start = time.Now().UTC().AddDate(0, 0, int(-ago))
 	}
-	if date := ctx.Timestamp("start-date"); !date.IsZero() {
-		start = *date
+	if date := ctx.Value("start-date").(time.Time); !date.IsZero() {
+		start = date
 	}
-	if date := ctx.Timestamp("end-date"); !date.IsZero() {
-		end = *date
+	if date := ctx.Value("end-date").(time.Time); !date.IsZero() {
+		end = date
 	}
 
 	// generate report
@@ -102,14 +103,17 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 	fmt.Println("- Total:", issue.Total)
 	fmt.Println("  - Open:", issue.Open)
 	fmt.Println("  - Closed:", issue.Closed)
-	fmt.Println("- Time to close:")
-	fmt.Println("  - Min:", math.Min(issue.Durations))
-	fmt.Println("  - Max:", math.Max(issue.Durations))
-	fmt.Println("  - Mean:", math.Mean(issue.Durations))
-	fmt.Println("  - Median:", math.Median(issue.Durations))
-	fmt.Println("  - 90th Percentile:", math.Percentile(issue.Durations, 0.9))
-	fmt.Println("  - 95th Percentile:", math.Percentile(issue.Durations, 0.95))
-	fmt.Println("  - 99th Percentile:", math.Percentile(issue.Durations, 0.99))
+	if len(issue.Durations) > 0 {
+		sort.Sort(issue.Durations)
+		fmt.Println("- Time to close:")
+		fmt.Println("  - Min:", math.Min(issue.Durations))
+		fmt.Println("  - Max:", math.Max(issue.Durations))
+		fmt.Println("  - Mean:", math.Mean(issue.Durations))
+		fmt.Println("  - Median:", math.Median(issue.Durations))
+		fmt.Println("  - 90th Percentile:", math.Percentile(issue.Durations, 0.9))
+		fmt.Println("  - 95th Percentile:", math.Percentile(issue.Durations, 0.95))
+		fmt.Println("  - 99th Percentile:", math.Percentile(issue.Durations, 0.99))
+	}
 
 	fmt.Println()
 
@@ -119,12 +123,15 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 	fmt.Println("  - Open:", pr.Open)
 	fmt.Println("  - Closed:", pr.Closed)
 	fmt.Println("  - Merged:", pr.Merged)
-	fmt.Println("- Time to merge:")
-	fmt.Println("  - Min:", math.Min(pr.Durations))
-	fmt.Println("  - Max:", math.Max(pr.Durations))
-	fmt.Println("  - Mean:", math.Mean(pr.Durations))
-	fmt.Println("  - Median:", math.Median(pr.Durations))
-	fmt.Println("  - 90th Percentile:", math.Percentile(pr.Durations, 0.9))
-	fmt.Println("  - 95th Percentile:", math.Percentile(pr.Durations, 0.95))
-	fmt.Println("  - 99th Percentile:", math.Percentile(pr.Durations, 0.99))
+	if len(pr.Durations) > 0 {
+		sort.Sort(pr.Durations)
+		fmt.Println("- Time to merge:")
+		fmt.Println("  - Min:", math.Min(pr.Durations))
+		fmt.Println("  - Max:", math.Max(pr.Durations))
+		fmt.Println("  - Mean:", math.Mean(pr.Durations))
+		fmt.Println("  - Median:", math.Median(pr.Durations))
+		fmt.Println("  - 90th Percentile:", math.Percentile(pr.Durations, 0.9))
+		fmt.Println("  - 95th Percentile:", math.Percentile(pr.Durations, 0.95))
+		fmt.Println("  - 99th Percentile:", math.Percentile(pr.Durations, 0.99))
+	}
 }
