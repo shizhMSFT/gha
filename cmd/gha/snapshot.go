@@ -56,7 +56,7 @@ func runSnapshot(ctx *cli.Context) error {
 	fmt.Println()
 	fmt.Println("Fetched", n, "issues and pull requests")
 
-	path := fmt.Sprintf("%s_%s_%s.json", org, repo, time.Now().Format("20060102_150405"))
+	path := fmt.Sprintf("%s_%s_%s_snapshot.json", org, repo, time.Now().Format("20060102_150405"))
 	if err := os.WriteFile(path, snapshot, 0644); err != nil {
 		return err
 	}
