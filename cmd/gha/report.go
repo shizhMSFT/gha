@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/shizhMSFT/gha/pkg/analysis"
@@ -104,11 +105,7 @@ func printSummary(summary *analysis.Summary, includeContributors bool) {
 	if includeContributors {
 		fmt.Println()
 		fmt.Println("### Contributors")
-		for name, summary := range summary.Authors {
-			fmt.Println()
-			fmt.Println("####", name)
-			printRepositorySummary(summary)
-		}
+		printContributors(summary.Authors)
 	}
 }
 
@@ -148,6 +145,106 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 		fmt.Println("  - 90th percentile:", formatDuration(math.Percentile(pr.Durations, 0.9)))
 		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(pr.Durations, 0.95)))
 		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(pr.Durations, 0.99)))
+	}
+}
+
+func printContributors(authors map[string]*analysis.RepositorySummary) {
+	fmt.Println("#### Issues")
+	printIssueSummaryTable(authors)
+	fmt.Println()
+	fmt.Println("#### Pull Requests")
+	printPullRequestSummaryTable(authors)
+}
+
+func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
+	// sort by issue counts
+	issueCounts := make(map[string]int)
+	for author, summary := range authors {
+		if summary.Issue.Total == 0 {
+			continue
+		}
+		issueCounts[author] += summary.Issue.Total
+	}
+	counts := sort.SliceFromMap(issueCounts, false)
+
+	// print header
+	nameSize := 6 // len("Author")
+	for _, entry := range counts {
+		if len(entry.Key) > nameSize {
+			nameSize = len(entry.Key)
+		}
+	}
+	headerFormat := fmt.Sprintf("| %%-%ds | %%-6s | %%-6s | %%-6s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
+	bodyFormat := fmt.Sprintf("| %%-%ds | %%-6d | %%-6d | %%-6d | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
+	fmt.Println()
+	fmt.Printf(headerFormat, "Author", "Total", "Open", "Closed", "Min", "Max", "Mean", "Median", "P90", "P95", "P99")
+	fmt.Printf("|%s|--------|--------|--------|----------|----------|----------|----------|----------|----------|----------|\n", strings.Repeat("-", nameSize+2))
+
+	// print body
+	for _, entry := range counts {
+		author := entry.Key
+		summary := authors[author].Issue
+		if len(summary.Durations) == 0 {
+			fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, "", "", "", "", "", "", "")
+			continue
+		}
+
+		sort.Sort(summary.Durations)
+		fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed,
+			formatDuration(math.Min(summary.Durations)),
+			formatDuration(math.Max(summary.Durations)),
+			formatDuration(math.Mean(summary.Durations)),
+			formatDuration(math.Median(summary.Durations)),
+			formatDuration(math.Percentile(summary.Durations, 0.9)),
+			formatDuration(math.Percentile(summary.Durations, 0.95)),
+			formatDuration(math.Percentile(summary.Durations, 0.99)),
+		)
+	}
+}
+
+func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary) {
+	// sort by pull request counts
+	prCounts := make(map[string]int)
+	for author, summary := range authors {
+		if summary.PullRequest.Total == 0 {
+			continue
+		}
+		prCounts[author] += summary.PullRequest.Total
+	}
+	counts := sort.SliceFromMap(prCounts, false)
+
+	// print header
+	nameSize := 6 // len("Author")
+	for _, entry := range counts {
+		if len(entry.Key) > nameSize {
+			nameSize = len(entry.Key)
+		}
+	}
+	headerFormat := fmt.Sprintf("| %%-%ds | %%-6s | %%-6s | %%-6s | %%-6s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
+	bodyFormat := fmt.Sprintf("| %%-%ds | %%-6d | %%-6d | %%-6d | %%-6d | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
+	fmt.Println()
+	fmt.Printf(headerFormat, "Author", "Total", "Open", "Closed", "Merged", "Min", "Max", "Mean", "Median", "P90", "P95", "P99")
+	fmt.Printf("|%s|--------|--------|--------|--------|----------|----------|----------|----------|----------|----------|----------|\n", strings.Repeat("-", nameSize+2))
+
+	// print body
+	for _, entry := range counts {
+		author := entry.Key
+		summary := authors[author].PullRequest
+		if len(summary.Durations) == 0 {
+			fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, summary.Merged, "", "", "", "", "", "", "")
+			continue
+		}
+
+		sort.Sort(summary.Durations)
+		fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, summary.Merged,
+			formatDuration(math.Min(summary.Durations)),
+			formatDuration(math.Max(summary.Durations)),
+			formatDuration(math.Mean(summary.Durations)),
+			formatDuration(math.Median(summary.Durations)),
+			formatDuration(math.Percentile(summary.Durations, 0.9)),
+			formatDuration(math.Percentile(summary.Durations, 0.95)),
+			formatDuration(math.Percentile(summary.Durations, 0.99)),
+		)
 	}
 }
 
