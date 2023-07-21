@@ -174,18 +174,18 @@ func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
 			nameSize = len(entry.Key)
 		}
 	}
-	headerFormat := fmt.Sprintf("| %%-%ds | %%-6s | %%-6s | %%-6s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
-	bodyFormat := fmt.Sprintf("| %%-%ds | %%-6d | %%-6d | %%-6d | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
+	headerFormat := fmt.Sprintf("| %%-%ds | %%-6s | %%-6s | %%-6s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
+	bodyFormat := fmt.Sprintf("| %%-%ds | %%-6d | %%-6d | %%-6d | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
 	fmt.Println()
-	fmt.Printf(headerFormat, "Author", "Total", "Open", "Closed", "Min", "Max", "Mean", "Median", "P90", "P95", "P99")
-	fmt.Printf("|%s|--------|--------|--------|----------|----------|----------|----------|----------|----------|----------|\n", strings.Repeat("-", nameSize+2))
+	fmt.Printf(headerFormat, "Author", "Total", "Open", "Closed", "Min", "Max", "Mean", "Median", "P90")
+	fmt.Printf("|%s|--------|--------|--------|----------|----------|----------|----------|----------|\n", strings.Repeat("-", nameSize+2))
 
 	// print body
 	for _, entry := range counts {
 		author := entry.Key
 		summary := authors[author].Issue
 		if len(summary.Durations) == 0 {
-			fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, "", "", "", "", "", "", "")
+			fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, "", "", "", "", "")
 			continue
 		}
 
@@ -196,8 +196,6 @@ func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
 			formatDuration(math.Mean(summary.Durations)),
 			formatDuration(math.Median(summary.Durations)),
 			formatDuration(math.Percentile(summary.Durations, 0.9)),
-			formatDuration(math.Percentile(summary.Durations, 0.95)),
-			formatDuration(math.Percentile(summary.Durations, 0.99)),
 		)
 	}
 }
@@ -220,18 +218,18 @@ func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary
 			nameSize = len(entry.Key)
 		}
 	}
-	headerFormat := fmt.Sprintf("| %%-%ds | %%-6s | %%-6s | %%-6s | %%-6s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
-	bodyFormat := fmt.Sprintf("| %%-%ds | %%-6d | %%-6d | %%-6d | %%-6d | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
+	headerFormat := fmt.Sprintf("| %%-%ds | %%-6s | %%-6s | %%-6s | %%-6s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
+	bodyFormat := fmt.Sprintf("| %%-%ds | %%-6d | %%-6d | %%-6d | %%-6d | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
 	fmt.Println()
-	fmt.Printf(headerFormat, "Author", "Total", "Open", "Closed", "Merged", "Min", "Max", "Mean", "Median", "P90", "P95", "P99")
-	fmt.Printf("|%s|--------|--------|--------|--------|----------|----------|----------|----------|----------|----------|----------|\n", strings.Repeat("-", nameSize+2))
+	fmt.Printf(headerFormat, "Author", "Total", "Open", "Closed", "Merged", "Min", "Max", "Mean", "Median", "P90")
+	fmt.Printf("|%s|--------|--------|--------|--------|----------|----------|----------|----------|----------|\n", strings.Repeat("-", nameSize+2))
 
 	// print body
 	for _, entry := range counts {
 		author := entry.Key
 		summary := authors[author].PullRequest
 		if len(summary.Durations) == 0 {
-			fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, summary.Merged, "", "", "", "", "", "", "")
+			fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, summary.Merged, "", "", "", "", "")
 			continue
 		}
 
@@ -242,8 +240,6 @@ func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary
 			formatDuration(math.Mean(summary.Durations)),
 			formatDuration(math.Median(summary.Durations)),
 			formatDuration(math.Percentile(summary.Durations, 0.9)),
-			formatDuration(math.Percentile(summary.Durations, 0.95)),
-			formatDuration(math.Percentile(summary.Durations, 0.99)),
 		)
 	}
 }
