@@ -111,6 +111,7 @@ func printSummary(summary *analysis.Summary, includeContributors bool) {
 
 func printRepositorySummary(summary *analysis.RepositorySummary) {
 	issue := summary.Issue
+	fmt.Println()
 	fmt.Println("Issues")
 	fmt.Println("- Total:", issue.Total)
 	fmt.Println("  - Open:", issue.Open)
@@ -127,9 +128,8 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(issue.Durations, 0.99)))
 	}
 
-	fmt.Println()
-
 	pr := summary.PullRequest
+	fmt.Println()
 	fmt.Println("Pull Requests")
 	fmt.Println("- Total:", pr.Total)
 	fmt.Println("  - Open:", pr.Open)
@@ -149,6 +149,7 @@ func printRepositorySummary(summary *analysis.RepositorySummary) {
 }
 
 func printContributors(authors map[string]*analysis.RepositorySummary) {
+	fmt.Println()
 	fmt.Println("#### Issues")
 	printIssueSummaryTable(authors)
 	fmt.Println()
