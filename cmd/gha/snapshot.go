@@ -17,6 +17,17 @@ var snapshotCommand = &cli.Command{
 	Usage:     "take a snapshot of a repository",
 	Aliases:   []string{"s"},
 	Flags: []cli.Flag{
+		&cli.IntFlag{
+			Name:     "updated-ago",
+			Usage:    "take partial snapshots updated since `DAYS` ago",
+			OnlyOnce: true,
+		},
+		&cli.TimestampFlag{
+			Name:     "updated-since",
+			Usage:    "take partial snapshots updated since `DATE`",
+			Config:   cli.TimestampConfig{Layout: time.DateOnly},
+			OnlyOnce: true,
+		},
 		&cli.BoolFlag{
 			Name:     "pr-reviews",
 			Usage:    "include pull request reviews in the snapshot",
@@ -49,7 +60,14 @@ func runSnapshot(ctx *cli.Context) error {
 	client.PageEvent = func(page int) {
 		fmt.Printf(".")
 	}
-	snapshot, n, err := client.Snapshot(ctx.Context, org, repo)
+	var updatedSince time.Time
+	if ago := ctx.Int("updated-ago"); ago > 0 {
+		updatedSince = time.Now().UTC().AddDate(0, 0, int(-ago))
+	}
+	if date := ctx.Value("updated-since").(time.Time); !date.IsZero() {
+		updatedSince = date
+	}
+	snapshot, n, err := client.Snapshot(ctx.Context, org, repo, updatedSince)
 	if err != nil {
 		return err
 	}
@@ -57,6 +75,9 @@ func runSnapshot(ctx *cli.Context) error {
 	fmt.Println("Fetched", n, "issues and pull requests")
 
 	path := fmt.Sprintf("%s_%s_%s_snapshot.json", org, repo, time.Now().UTC().Format("20060102_150405"))
+	if !updatedSince.IsZero() {
+		path = fmt.Sprintf("%s_since_%s.json", path[:len(path)-5], updatedSince.Format("20060102"))
+	}
 	if err := os.WriteFile(path, snapshot, 0644); err != nil {
 		return err
 	}

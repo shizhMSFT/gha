@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type Client struct {
@@ -23,13 +24,16 @@ func NewClient() *Client {
 }
 
 // Snapshot takes a snapshot of all issues and pull requests in a repository.
-func (c *Client) Snapshot(ctx context.Context, org, repo string) ([]byte, int, error) {
+func (c *Client) Snapshot(ctx context.Context, org, repo string, updatedSince time.Time) ([]byte, int, error) {
 	var issues []json.RawMessage
 	for page := 1; ; page++ {
 		if c.PageEvent != nil {
 			c.PageEvent(page)
 		}
 		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/issues?state=all&direction=asc&per_page=100&page=%d", org, repo, page)
+		if !updatedSince.IsZero() {
+			url += "&since=" + updatedSince.UTC().Format(time.RFC3339)
+		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 		if err != nil {
 			return nil, 0, err
