@@ -17,6 +17,12 @@ var snapshotCommand = &cli.Command{
 	Usage:     "take a snapshot of a repository",
 	Aliases:   []string{"s"},
 	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:     "state",
+			Usage:    "take partial snapshots of `{open, closed, all}` issues and pull requests",
+			Value:    "all",
+			OnlyOnce: true,
+		},
 		&cli.IntFlag{
 			Name:     "updated-ago",
 			Usage:    "take partial snapshots updated since `DAYS` ago",
@@ -60,7 +66,9 @@ func runSnapshot(ctx *cli.Context) error {
 	client.PageEvent = func(page int) {
 		fmt.Printf(".")
 	}
-	var opts github.SnapshotOptions
+	opts := github.SnapshotOptions{
+		State: ctx.String("state"),
+	}
 	if ago := ctx.Int("updated-ago"); ago > 0 {
 		date := time.Now().AddDate(0, 0, int(-ago))
 		opts.UpdatedSince = &date

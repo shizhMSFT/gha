@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -25,21 +28,36 @@ func NewClient() *Client {
 
 // SnapshotOptions are options for taking a snapshot.
 type SnapshotOptions struct {
+	State        string
 	UpdatedSince *time.Time
 }
 
 // Snapshot takes a snapshot of all issues and pull requests in a repository.
 func (c *Client) Snapshot(ctx context.Context, org, repo string, opts SnapshotOptions) ([]byte, int, error) {
+	switch opts.State = strings.ToLower(opts.State); opts.State {
+	case "", "open", "closed", "all":
+	default:
+		return nil, 0, fmt.Errorf("invalid state: %s", opts.State)
+	}
 	var issues []json.RawMessage
 	for page := 1; ; page++ {
 		if c.PageEvent != nil {
 			c.PageEvent(page)
 		}
-		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/issues?state=all&direction=asc&per_page=100&page=%d", org, repo, page)
-		if opts.UpdatedSince != nil {
-			url += "&since=" + opts.UpdatedSince.UTC().Format(time.RFC3339)
+		u, err := url.Parse(fmt.Sprintf("https://api.github.com/repos/%s/%s/issues", org, repo))
+		if err != nil {
+			return nil, 0, err
 		}
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		q := u.Query()
+		q.Set("state", opts.State)
+		q.Set("direction", "asc")
+		q.Set("per_page", "100")
+		q.Set("page", strconv.Itoa(page))
+		if opts.UpdatedSince != nil {
+			q.Set("since", opts.UpdatedSince.UTC().Format(time.RFC3339))
+		}
+		u.RawQuery = q.Encode()
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -49,7 +67,7 @@ func (c *Client) Snapshot(ctx context.Context, org, repo string, opts SnapshotOp
 		}
 		pagedIssues, err := c.decodeResponse(resp)
 		if err != nil {
-			return nil, 0, fmt.Errorf("%s: %w", url, err)
+			return nil, 0, fmt.Errorf("%v: %w", u, err)
 		}
 		issues = append(issues, pagedIssues...)
 		if len(pagedIssues) < 100 {
