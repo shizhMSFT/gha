@@ -60,14 +60,15 @@ func runSnapshot(ctx *cli.Context) error {
 	client.PageEvent = func(page int) {
 		fmt.Printf(".")
 	}
-	var updatedSince time.Time
+	var opts github.SnapshotOptions
 	if ago := ctx.Int("updated-ago"); ago > 0 {
-		updatedSince = time.Now().UTC().AddDate(0, 0, int(-ago))
+		date := time.Now().AddDate(0, 0, int(-ago))
+		opts.UpdatedSince = &date
 	}
 	if date := ctx.Value("updated-since").(time.Time); !date.IsZero() {
-		updatedSince = date
+		opts.UpdatedSince = &date
 	}
-	snapshot, n, err := client.Snapshot(ctx.Context, org, repo, updatedSince)
+	snapshot, n, err := client.Snapshot(ctx.Context, org, repo, opts)
 	if err != nil {
 		return err
 	}
@@ -75,8 +76,8 @@ func runSnapshot(ctx *cli.Context) error {
 	fmt.Println("Fetched", n, "issues and pull requests")
 
 	path := fmt.Sprintf("%s_%s_%s_snapshot.json", org, repo, time.Now().UTC().Format("20060102_150405"))
-	if !updatedSince.IsZero() {
-		path = fmt.Sprintf("%s_since_%s.json", path[:len(path)-5], updatedSince.Format("20060102"))
+	if opts.UpdatedSince != nil {
+		path = fmt.Sprintf("%s_since_%s.json", path[:len(path)-5], opts.UpdatedSince.UTC().Format("20060102"))
 	}
 	if err := os.WriteFile(path, snapshot, 0644); err != nil {
 		return err
