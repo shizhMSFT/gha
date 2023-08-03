@@ -9,6 +9,7 @@ import (
 
 	"github.com/shizhMSFT/gha/pkg/analysis"
 	"github.com/shizhMSFT/gha/pkg/github"
+	"github.com/shizhMSFT/gha/pkg/markdown"
 	"github.com/shizhMSFT/gha/pkg/math"
 	"github.com/shizhMSFT/gha/pkg/sort"
 	"github.com/urfave/cli/v3"
@@ -42,6 +43,16 @@ var reportCommand = &cli.Command{
 			Usage:    "include contributors from the report",
 			OnlyOnce: true,
 		},
+		&cli.IntFlag{
+			Name:     "issue-sla",
+			Usage:    "report issues that were open for more than `DAYS`",
+			OnlyOnce: true,
+		},
+		&cli.IntFlag{
+			Name:     "pr-sla",
+			Usage:    "report pull requests that were open for more than `DAYS`",
+			OnlyOnce: true,
+		},
 	},
 	Action: runReport,
 }
@@ -62,7 +73,11 @@ func runReport(ctx *cli.Context) error {
 	if date := ctx.Value("end-date").(time.Time); !date.IsZero() {
 		timeFrame.End = date
 	}
-	includeContributors := ctx.Bool("contributors")
+	opts := printSummaryOptions{
+		includeContributors: ctx.Bool("contributors"),
+		issueSLA:            int(ctx.Int("issue-sla")),
+		pullRequestSLA:      int(ctx.Int("pr-sla")),
+	}
 
 	// generate report
 	fmt.Println("GitHub Analysis Report")
@@ -80,12 +95,14 @@ func runReport(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		printSummary(report.Summarize(path, snapshot), includeContributors)
+		printOpts := opts
+		opts.snapshot = snapshot
+		printSummary(report.Summarize(path, snapshot), printOpts)
 	}
 	if ctx.NArg() > 1 {
 		fmt.Println()
 		fmt.Println("## Overall")
-		printSummary(report.Abstract(), includeContributors)
+		printSummary(report.Abstract(), opts)
 	}
 	return nil
 }
@@ -99,27 +116,34 @@ func printTimeFrame(timeFrame analysis.TimeFrame) {
 	}
 }
 
-func printSummary(summary *analysis.Summary, includeContributors bool) {
-	printRepositorySummary(summary.RepositorySummary)
+type printSummaryOptions struct {
+	includeContributors bool
+	snapshot            map[int]github.Issue
+	issueSLA            int
+	pullRequestSLA      int
+}
 
-	if includeContributors {
+func printSummary(summary *analysis.Summary, opts printSummaryOptions) {
+	printRepositorySummary(summary.RepositorySummary, opts)
+
+	if opts.includeContributors {
 		fmt.Println()
 		fmt.Println("### Contributors")
 		printContributors(summary.Authors)
 	}
 }
 
-func printRepositorySummary(summary *analysis.RepositorySummary) {
+func printRepositorySummary(summary *analysis.RepositorySummary, opts printSummaryOptions) {
 	fmt.Println()
 	fmt.Println("Issues")
-	printIssueSummary(summary.Issue)
+	printIssueSummary(summary.Issue, opts)
 
 	fmt.Println()
 	fmt.Println("Pull Requests")
-	printPullRequestSummary(summary.PullRequest)
+	printPullRequestSummary(summary.PullRequest, opts)
 }
 
-func printIssueSummary(summary *analysis.IssueSummary) {
+func printIssueSummary(summary *analysis.IssueSummary, opts printSummaryOptions) {
 	fmt.Println("- Total:", summary.Total)
 	fmt.Println("  - Open:", summary.Open)
 	fmt.Println("  - Closed:", summary.Closed)
@@ -134,9 +158,28 @@ func printIssueSummary(summary *analysis.IssueSummary) {
 		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(summary.Durations, 0.95)))
 		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(summary.Durations, 0.99)))
 	}
+	if opts.issueSLA > 0 {
+		fmt.Println()
+		fmt.Println("Out of SLA:", opts.issueSLA, "days")
+		issues := analysis.Filter(opts.snapshot, func(issue github.Issue) bool {
+			if issue.IsPullRequest() {
+				return false
+			}
+			if issue.State != "closed" {
+				return false
+			}
+			duration := issue.Duration()
+			return duration > time.Duration(opts.issueSLA)*time.Hour*24
+		})
+		table := markdown.NewTable("#Issue", "Title", "Duration")
+		for _, issue := range issues {
+			table.AddRow(issue.Number, issue.Title, formatDuration(issue.Duration()))
+		}
+		table.Print(os.Stdout)
+	}
 }
 
-func printPullRequestSummary(summary *analysis.PullRequestSummary) {
+func printPullRequestSummary(summary *analysis.PullRequestSummary, opts printSummaryOptions) {
 	fmt.Println("- Total:", summary.Total)
 	fmt.Println("  - Open:", summary.Open)
 	fmt.Println("  - Closed:", summary.Closed)
@@ -151,6 +194,28 @@ func printPullRequestSummary(summary *analysis.PullRequestSummary) {
 		fmt.Println("  - 90th percentile:", formatDuration(math.Percentile(summary.Durations, 0.9)))
 		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(summary.Durations, 0.95)))
 		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(summary.Durations, 0.99)))
+	}
+	if opts.pullRequestSLA > 0 {
+		fmt.Println()
+		fmt.Println("Out of SLA:", opts.pullRequestSLA, "days")
+		pullRequests := analysis.Filter(opts.snapshot, func(issue github.Issue) bool {
+			if !issue.IsPullRequest() {
+				return false
+			}
+			if issue.State != "closed" {
+				return false
+			}
+			if !issue.Merged() {
+				return false
+			}
+			duration := issue.Duration()
+			return duration > time.Duration(opts.pullRequestSLA)*time.Hour*24
+		})
+		table := markdown.NewTable("#PR", "Title", "Duration")
+		for _, issue := range pullRequests {
+			table.AddRow(issue.Number, issue.Title, formatDuration(issue.Duration()))
+		}
+		table.Print(os.Stdout)
 	}
 }
 
