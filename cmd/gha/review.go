@@ -15,10 +15,10 @@ import (
 )
 
 var pullRequestReviewCommand = &cli.Command{
-	Name:      "pull-request-review",
+	Name:      "pr-review",
 	Usage:     "analyze pull request reviews",
 	ArgsUsage: "<review_snapshot> [...]",
-	Aliases:   []string{"pr-review", "prr", "pr", "p"},
+	Aliases:   []string{"pr", "p"},
 	Flags: []cli.Flag{
 		&cli.IntFlag{
 			Name:     "ago",
