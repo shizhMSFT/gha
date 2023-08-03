@@ -91,7 +91,7 @@ func Summarize(issues map[int]github.Issue, timeFrame TimeFrame) *Summary {
 				if issue.Merged() {
 					summary.PullRequest.Merged++
 					authorSummary.PullRequest.Merged++
-					duration := issue.ClosedAt.Sub(issue.CreatedAt)
+					duration := issue.Duration()
 					summary.PullRequest.Durations = append(summary.PullRequest.Durations, duration)
 					authorSummary.PullRequest.Durations = append(authorSummary.PullRequest.Durations, duration)
 				} else {
@@ -109,7 +109,7 @@ func Summarize(issues map[int]github.Issue, timeFrame TimeFrame) *Summary {
 			case "closed":
 				summary.Issue.Closed++
 				authorSummary.Issue.Closed++
-				duration := issue.ClosedAt.Sub(issue.CreatedAt)
+				duration := issue.Duration()
 				summary.Issue.Durations = append(summary.Issue.Durations, duration)
 				authorSummary.Issue.Durations = append(authorSummary.Issue.Durations, duration)
 			}

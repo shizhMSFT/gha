@@ -63,6 +63,13 @@ func (i Issue) Merged() bool {
 	return i.IsPullRequest() && i.PullRequest.MergedAt != nil
 }
 
+func (i Issue) Duration() time.Duration {
+	if i.ClosedAt == nil {
+		return time.Since(i.CreatedAt)
+	}
+	return i.ClosedAt.Sub(i.CreatedAt)
+}
+
 func ParseIssues(jsonBytes []byte) (map[int]Issue, error) {
 	var issues []Issue
 	if err := json.Unmarshal(jsonBytes, &issues); err != nil {
