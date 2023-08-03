@@ -68,6 +68,9 @@ func (t *Table) Print(w io.Writer) error {
 			return err
 		}
 	}
+	if _, err := w.Write([]byte("\n")); err != nil {
+		return err
+	}
 
 	// print body
 	for _, row := range t.body {
