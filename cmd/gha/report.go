@@ -110,41 +110,47 @@ func printSummary(summary *analysis.Summary, includeContributors bool) {
 }
 
 func printRepositorySummary(summary *analysis.RepositorySummary) {
-	issue := summary.Issue
 	fmt.Println()
 	fmt.Println("Issues")
-	fmt.Println("- Total:", issue.Total)
-	fmt.Println("  - Open:", issue.Open)
-	fmt.Println("  - Closed:", issue.Closed)
-	if len(issue.Durations) > 0 {
-		sort.Sort(issue.Durations)
-		fmt.Println("- Time to close:")
-		fmt.Println("  - Min:", formatDuration(math.Min(issue.Durations)))
-		fmt.Println("  - Max:", formatDuration(math.Max(issue.Durations)))
-		fmt.Println("  - Mean:", formatDuration(math.Mean(issue.Durations)))
-		fmt.Println("  - Median:", formatDuration(math.Median(issue.Durations)))
-		fmt.Println("  - 90th percentile:", formatDuration(math.Percentile(issue.Durations, 0.9)))
-		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(issue.Durations, 0.95)))
-		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(issue.Durations, 0.99)))
-	}
+	printIssueSummary(summary.Issue)
 
-	pr := summary.PullRequest
 	fmt.Println()
 	fmt.Println("Pull Requests")
-	fmt.Println("- Total:", pr.Total)
-	fmt.Println("  - Open:", pr.Open)
-	fmt.Println("  - Closed:", pr.Closed)
-	fmt.Println("  - Merged:", pr.Merged)
-	if len(pr.Durations) > 0 {
-		sort.Sort(pr.Durations)
+	printPullRequestSummary(summary.PullRequest)
+}
+
+func printIssueSummary(summary *analysis.IssueSummary) {
+	fmt.Println("- Total:", summary.Total)
+	fmt.Println("  - Open:", summary.Open)
+	fmt.Println("  - Closed:", summary.Closed)
+	if len(summary.Durations) > 0 {
+		sort.Sort(summary.Durations)
+		fmt.Println("- Time to close:")
+		fmt.Println("  - Min:", formatDuration(math.Min(summary.Durations)))
+		fmt.Println("  - Max:", formatDuration(math.Max(summary.Durations)))
+		fmt.Println("  - Mean:", formatDuration(math.Mean(summary.Durations)))
+		fmt.Println("  - Median:", formatDuration(math.Median(summary.Durations)))
+		fmt.Println("  - 90th percentile:", formatDuration(math.Percentile(summary.Durations, 0.9)))
+		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(summary.Durations, 0.95)))
+		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(summary.Durations, 0.99)))
+	}
+}
+
+func printPullRequestSummary(summary *analysis.PullRequestSummary) {
+	fmt.Println("- Total:", summary.Total)
+	fmt.Println("  - Open:", summary.Open)
+	fmt.Println("  - Closed:", summary.Closed)
+	fmt.Println("  - Merged:", summary.Merged)
+	if len(summary.Durations) > 0 {
+		sort.Sort(summary.Durations)
 		fmt.Println("- Time to merge:")
-		fmt.Println("  - Min:", formatDuration(math.Min(pr.Durations)))
-		fmt.Println("  - Max:", formatDuration(math.Max(pr.Durations)))
-		fmt.Println("  - Mean:", formatDuration(math.Mean(pr.Durations)))
-		fmt.Println("  - Median:", formatDuration(math.Median(pr.Durations)))
-		fmt.Println("  - 90th percentile:", formatDuration(math.Percentile(pr.Durations, 0.9)))
-		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(pr.Durations, 0.95)))
-		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(pr.Durations, 0.99)))
+		fmt.Println("  - Min:", formatDuration(math.Min(summary.Durations)))
+		fmt.Println("  - Max:", formatDuration(math.Max(summary.Durations)))
+		fmt.Println("  - Mean:", formatDuration(math.Mean(summary.Durations)))
+		fmt.Println("  - Median:", formatDuration(math.Median(summary.Durations)))
+		fmt.Println("  - 90th percentile:", formatDuration(math.Percentile(summary.Durations, 0.9)))
+		fmt.Println("  - 95th percentile:", formatDuration(math.Percentile(summary.Durations, 0.95)))
+		fmt.Println("  - 99th percentile:", formatDuration(math.Percentile(summary.Durations, 0.99)))
 	}
 }
 
@@ -152,6 +158,7 @@ func printContributors(authors map[string]*analysis.RepositorySummary) {
 	fmt.Println()
 	fmt.Println("#### Issues")
 	printIssueSummaryTable(authors)
+
 	fmt.Println()
 	fmt.Println("#### Pull Requests")
 	printPullRequestSummaryTable(authors)
