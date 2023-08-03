@@ -134,15 +134,16 @@ func printSummary(summary *analysis.Summary, opts printSummaryOptions) {
 
 func printRepositorySummary(summary *analysis.RepositorySummary, opts printSummaryOptions) {
 	fmt.Println()
-	fmt.Println("Issues")
+	fmt.Println("### Issues")
 	printIssueSummary(summary.Issue, opts)
 
 	fmt.Println()
-	fmt.Println("Pull Requests")
+	fmt.Println("### Pull Requests")
 	printPullRequestSummary(summary.PullRequest, opts)
 }
 
 func printIssueSummary(summary *analysis.IssueSummary, opts printSummaryOptions) {
+	fmt.Println()
 	fmt.Println("- Total:", summary.Total)
 	fmt.Println("  - Open:", summary.Open)
 	fmt.Println("  - Closed:", summary.Closed)
@@ -190,6 +191,7 @@ func printIssueSummary(summary *analysis.IssueSummary, opts printSummaryOptions)
 }
 
 func printPullRequestSummary(summary *analysis.PullRequestSummary, opts printSummaryOptions) {
+	fmt.Println()
 	fmt.Println("- Total:", summary.Total)
 	fmt.Println("  - Open:", summary.Open)
 	fmt.Println("  - Closed:", summary.Closed)
