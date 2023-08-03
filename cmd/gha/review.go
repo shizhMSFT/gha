@@ -91,11 +91,11 @@ func printPullRequestReviewCount(reviewCounts map[string]int) {
 	})
 
 	// print table
-	barSize := 50
-	table := markdown.NewTable("Reviewer", "Count", strings.Repeat(" ", barSize))
+	table := markdown.NewTable("Reviewer", "Count", "")
 	if len(counts) == 0 {
 		return
 	}
+	barSize := 50
 	max := counts[0].Value
 	for _, entry := range counts {
 		bar := strings.Repeat(" ", entry.Value*barSize/max)
