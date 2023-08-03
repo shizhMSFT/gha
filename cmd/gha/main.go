@@ -12,7 +12,7 @@ import (
 var app = &cli.Command{
 	Name:    "gha",
 	Usage:   "GitHub Analyzer",
-	Version: "0.2.0",
+	Version: "0.3.0",
 	Commands: []*cli.Command{
 		snapshotCommand,
 		diffCommand,
