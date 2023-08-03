@@ -247,7 +247,7 @@ func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
 		author := entry.Key
 		summary := authors[author].Issue
 		if len(summary.Durations) == 0 {
-			table.AddRow(author, summary.Total, summary.Open, summary.Closed, "", "", "", "", "")
+			table.AddRow(author, summary.Total, summary.Open, summary.Closed, "-", "-", "-", "-", "-")
 			continue
 		}
 
@@ -283,7 +283,7 @@ func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary
 		author := entry.Key
 		summary := authors[author].PullRequest
 		if len(summary.Durations) == 0 {
-			table.AddRow(author, summary.Total, summary.Open, summary.Closed, summary.Merged, "", "", "", "", "")
+			table.AddRow(author, summary.Total, summary.Open, summary.Closed, summary.Merged, "-", "-", "-", "-", "-")
 			continue
 		}
 
