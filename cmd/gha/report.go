@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/shizhMSFT/gha/pkg/analysis"
@@ -242,30 +241,18 @@ func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
 		return s[i].Value > s[j].Value
 	})
 
-	// print header
-	nameSize := 6 // len("Author")
-	for _, entry := range counts {
-		if len(entry.Key) > nameSize {
-			nameSize = len(entry.Key)
-		}
-	}
-	headerFormat := fmt.Sprintf("| %%-%ds | %%-6s | %%-6s | %%-6s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
-	bodyFormat := fmt.Sprintf("| %%-%ds | %%-6d | %%-6d | %%-6d | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
-	fmt.Println()
-	fmt.Printf(headerFormat, "Author", "Total", "Open", "Closed", "Min", "Max", "Mean", "Median", "P90")
-	fmt.Printf("|%s|--------|--------|--------|----------|----------|----------|----------|----------|\n", strings.Repeat("-", nameSize+2))
-
-	// print body
+	// print table
+	table := markdown.NewTable("Author", "Total", "Open", "Closed", "Min", "Max", "Mean", "Median", "P90")
 	for _, entry := range counts {
 		author := entry.Key
 		summary := authors[author].Issue
 		if len(summary.Durations) == 0 {
-			fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, "", "", "", "", "")
+			table.AddRow(author, summary.Total, summary.Open, summary.Closed, "", "", "", "", "")
 			continue
 		}
 
 		sort.Sort(summary.Durations)
-		fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed,
+		table.AddRow(author, summary.Total, summary.Open, summary.Closed,
 			formatDuration(math.Min(summary.Durations)),
 			formatDuration(math.Max(summary.Durations)),
 			formatDuration(math.Mean(summary.Durations)),
@@ -273,6 +260,8 @@ func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
 			formatDuration(math.Percentile(summary.Durations, 0.9)),
 		)
 	}
+	fmt.Println()
+	table.Print(os.Stdout)
 }
 
 func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary) {
@@ -288,30 +277,18 @@ func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary
 		return s[i].Value > s[j].Value
 	})
 
-	// print header
-	nameSize := 6 // len("Author")
-	for _, entry := range counts {
-		if len(entry.Key) > nameSize {
-			nameSize = len(entry.Key)
-		}
-	}
-	headerFormat := fmt.Sprintf("| %%-%ds | %%-6s | %%-6s | %%-6s | %%-6s | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
-	bodyFormat := fmt.Sprintf("| %%-%ds | %%-6d | %%-6d | %%-6d | %%-6d | %%-8s | %%-8s | %%-8s | %%-8s | %%-8s |\n", nameSize)
-	fmt.Println()
-	fmt.Printf(headerFormat, "Author", "Total", "Open", "Closed", "Merged", "Min", "Max", "Mean", "Median", "P90")
-	fmt.Printf("|%s|--------|--------|--------|--------|----------|----------|----------|----------|----------|\n", strings.Repeat("-", nameSize+2))
-
-	// print body
+	// print table
+	table := markdown.NewTable("Author", "Total", "Open", "Closed", "Merged", "Min", "Max", "Mean", "Median", "P90")
 	for _, entry := range counts {
 		author := entry.Key
 		summary := authors[author].PullRequest
 		if len(summary.Durations) == 0 {
-			fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, summary.Merged, "", "", "", "", "")
+			table.AddRow(author, summary.Total, summary.Open, summary.Closed, summary.Merged, "", "", "", "", "")
 			continue
 		}
 
 		sort.Sort(summary.Durations)
-		fmt.Printf(bodyFormat, author, summary.Total, summary.Open, summary.Closed, summary.Merged,
+		table.AddRow(author, summary.Total, summary.Open, summary.Closed, summary.Merged,
 			formatDuration(math.Min(summary.Durations)),
 			formatDuration(math.Max(summary.Durations)),
 			formatDuration(math.Mean(summary.Durations)),
@@ -319,6 +296,8 @@ func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary
 			formatDuration(math.Percentile(summary.Durations, 0.9)),
 		)
 	}
+	fmt.Println()
+	table.Print(os.Stdout)
 }
 
 func formatDuration(d time.Duration) string {

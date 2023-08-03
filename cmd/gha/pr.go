@@ -9,6 +9,7 @@ import (
 
 	"github.com/shizhMSFT/gha/pkg/analysis"
 	"github.com/shizhMSFT/gha/pkg/github"
+	"github.com/shizhMSFT/gha/pkg/markdown"
 	"github.com/shizhMSFT/gha/pkg/sort"
 	"github.com/urfave/cli/v3"
 )
@@ -89,21 +90,9 @@ func printPullRequestReviewCount(reviewCounts map[string]int) {
 		return s[i].Value > s[j].Value
 	})
 
-	// print header
-	nameSize := 8 // len("Reviewer")
-	for _, entry := range counts {
-		if len(entry.Key) > nameSize {
-			nameSize = len(entry.Key)
-		}
-	}
+	// print table
 	barSize := 50
-	headerFormat := fmt.Sprintf("| %%-%ds | %%-%ds | %%-%ds |\n", nameSize, 5, barSize+2)
-	bodyFormat := fmt.Sprintf("| %%-%ds | %%%dd | %%-%ds |\n", nameSize, 5, barSize+2)
-	fmt.Println()
-	fmt.Printf(headerFormat, "Reviewer", "Count", "")
-	fmt.Printf("|%s|%s|%s|\n", strings.Repeat("-", nameSize+2), strings.Repeat("-", 7), strings.Repeat("-", barSize+4))
-
-	// print body
+	table := markdown.NewTable("Reviewer", "Count", strings.Repeat(" ", barSize))
 	if len(counts) == 0 {
 		return
 	}
@@ -115,6 +104,8 @@ func printPullRequestReviewCount(reviewCounts map[string]int) {
 		} else {
 			bar = "`" + bar + "`"
 		}
-		fmt.Printf(bodyFormat, entry.Key, entry.Value, bar)
+		table.AddRow(entry.Key, entry.Value, bar)
 	}
+	fmt.Println()
+	table.Print(os.Stdout)
 }
