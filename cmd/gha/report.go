@@ -166,7 +166,9 @@ func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
 		}
 		issueCounts[author] += summary.Issue.Total
 	}
-	counts := sort.SliceFromMap(issueCounts, false)
+	counts := sort.SliceFromMap(issueCounts).Sort(func(s []sort.MapEntry[string, int], i, j int) bool {
+		return s[i].Value > s[j].Value
+	})
 
 	// print header
 	nameSize := 6 // len("Author")
@@ -210,7 +212,9 @@ func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary
 		}
 		prCounts[author] += summary.PullRequest.Total
 	}
-	counts := sort.SliceFromMap(prCounts, false)
+	counts := sort.SliceFromMap(prCounts).Sort(func(s []sort.MapEntry[string, int], i, j int) bool {
+		return s[i].Value > s[j].Value
+	})
 
 	// print header
 	nameSize := 6 // len("Author")

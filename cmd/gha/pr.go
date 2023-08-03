@@ -85,7 +85,9 @@ func runPullRequestReview(ctx *cli.Context) error {
 
 func printPullRequestReviewCount(reviewCounts map[string]int) {
 	// sort by review counts
-	counts := sort.SliceFromMap(reviewCounts, false)
+	counts := sort.SliceFromMap(reviewCounts).Sort(func(s []sort.MapEntry[string, int], i, j int) bool {
+		return s[i].Value > s[j].Value
+	})
 
 	// print header
 	nameSize := 8 // len("Reviewer")

@@ -1,31 +1,25 @@
 package sort
 
-import (
-	"sort"
-
-	"golang.org/x/exp/constraints"
-)
+import "sort"
 
 type MapEntry[K comparable, V any] struct {
 	Key   K
 	Value V
 }
 
-type MapEntrySlice[K comparable, V constraints.Ordered] []MapEntry[K, V]
+type MapEntrySlice[K comparable, V any] []MapEntry[K, V]
 
-func (s MapEntrySlice[K, V]) Len() int           { return len(s) }
-func (s MapEntrySlice[K, V]) Less(i, j int) bool { return s[i].Value < s[j].Value }
-func (s MapEntrySlice[K, V]) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s MapEntrySlice[K, V]) Sort(less func(s []MapEntry[K, V], i, j int) bool) MapEntrySlice[K, V] {
+	sort.Slice(s, func(i, j int) bool {
+		return less(s, i, j)
+	})
+	return s
+}
 
-func SliceFromMap[K comparable, V constraints.Ordered](m map[K]V, ascending bool) []MapEntry[K, V] {
+func SliceFromMap[K comparable, V any](m map[K]V) MapEntrySlice[K, V] {
 	s := make([]MapEntry[K, V], 0, len(m))
 	for k, v := range m {
 		s = append(s, MapEntry[K, V]{k, v})
-	}
-	if ascending {
-		sort.Sort(MapEntrySlice[K, V](s))
-	} else {
-		sort.Sort(sort.Reverse(MapEntrySlice[K, V](s)))
 	}
 	return s
 }
