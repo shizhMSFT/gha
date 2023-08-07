@@ -106,6 +106,31 @@ func (c *Client) PullRequestReviews(ctx context.Context, org, repo string, numbe
 	return json.Marshal(reviews)
 }
 
+// IssueComments takes a snapshot of all comments for an issue.
+func (c *Client) IssueComments(ctx context.Context, org, repo string, number int) ([]byte, error) {
+	var comments []json.RawMessage
+	for page := 1; ; page++ {
+		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/issues/%d/comments?per_page=100&page=%d", org, repo, number, page)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.do(req)
+		if err != nil {
+			return nil, err
+		}
+		pagedComments, err := c.decodeResponse(resp)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", url, err)
+		}
+		comments = append(comments, pagedComments...)
+		if len(pagedComments) < 100 {
+			break
+		}
+	}
+	return json.Marshal(comments)
+}
+
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	req.Header.Set("Accept", "application/vnd.github+json")
 	apiVersion := c.APIVersion

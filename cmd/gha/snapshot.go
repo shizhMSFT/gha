@@ -50,6 +50,22 @@ var snapshotCommand = &cli.Command{
 			Config:   cli.TimestampConfig{Layout: time.DateOnly},
 			OnlyOnce: true,
 		},
+		&cli.BoolFlag{
+			Name:     "issue-comments",
+			Usage:    "include issue comments in the snapshot",
+			OnlyOnce: true,
+		},
+		&cli.IntFlag{
+			Name:     "issue-comments-ago",
+			Usage:    "include issue comments since `DAYS` ago",
+			OnlyOnce: true,
+		},
+		&cli.TimestampFlag{
+			Name:     "issue-comments-since",
+			Usage:    "include issue comments since `DATE`",
+			Config:   cli.TimestampConfig{Layout: time.DateOnly},
+			OnlyOnce: true,
+		},
 	},
 	Action: runSnapshot,
 }
@@ -94,6 +110,11 @@ func runSnapshot(ctx *cli.Context) error {
 
 	if ctx.Bool("pr-reviews") {
 		if err := snapshotPullRequestReviews(ctx, org, repo, client, snapshot); err != nil {
+			return err
+		}
+	}
+	if ctx.Bool("issue-comments") {
+		if err := snapshotIssueComments(ctx, org, repo, client, snapshot); err != nil {
 			return err
 		}
 	}
@@ -157,6 +178,64 @@ func snapshotPullRequestReviews(ctx *cli.Context, org string, repo string, clien
 		return err
 	}
 	fmt.Println("Saved pull request reviews to", path)
+
+	return nil
+}
+
+func snapshotIssueComments(ctx *cli.Context, org string, repo string, client *github.Client, snapshot []byte) error {
+	// parse flags
+	var start time.Time
+	if ago := ctx.Int("issue-comments-ago"); ago > 0 {
+		start = time.Now().UTC().AddDate(0, 0, int(-ago))
+	}
+	if date := ctx.Value("issue-comments-since").(time.Time); !date.IsZero() {
+		start = date
+	}
+
+	// fetch issue comments
+	issues, err := github.ParseIssues(snapshot)
+	if err != nil {
+		return err
+	}
+	comments := make(map[int]json.RawMessage)
+	for _, issue := range issues {
+		if !start.IsZero() && issue.CreatedAt.Before(start) {
+			continue
+		}
+		comments[issue.Number] = nil
+	}
+	total := len(comments)
+	fmt.Printf("Fetching comments of %d issues", total)
+	if !start.IsZero() {
+		fmt.Printf(" since %s", start.Format(time.DateOnly))
+	}
+	fmt.Println("...")
+
+	count := 0
+	for number := range comments {
+		comment, err := client.IssueComments(ctx.Context, org, repo, number)
+		if err != nil {
+			return err
+		}
+		comments[number] = comment
+		count++
+		fmt.Printf(".")
+		if count%50 == 0 {
+			fmt.Printf(" %6g%%\n", float64(10000*count/total)/100.0)
+		}
+	}
+	fmt.Println(strings.Repeat(" ", 50-count%50), "100.00%")
+
+	// save comments
+	path := fmt.Sprintf("%s_%s_%s_comments.json", org, repo, time.Now().UTC().Format("20060102_150405"))
+	commentsJSON, err := json.Marshal(comments)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(path, commentsJSON, 0644); err != nil {
+		return err
+	}
+	fmt.Println("Saved issue comments to", path)
 
 	return nil
 }
