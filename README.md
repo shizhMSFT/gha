@@ -5,7 +5,7 @@ Analyze GitHub repositories and produce reports.
 ## Build and Install
 
 > **Note**
-> Make sure `go 1.20` or above is installed before `make`.
+> Make sure `go 1.21.0` or above is installed before `make`.
 
 To build and install `gha` to `~/bin` on Linux, simply run
 

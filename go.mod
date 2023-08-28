@@ -1,6 +1,6 @@
 module github.com/shizhMSFT/gha
 
-go 1.20
+go 1.21
 
 require (
 	github.com/urfave/cli/v3 v3.0.0-alpha4
