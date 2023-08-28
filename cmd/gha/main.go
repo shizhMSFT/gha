@@ -18,6 +18,7 @@ var app = &cli.Command{
 		diffCommand,
 		reportCommand,
 		pullRequestReviewCommand,
+		issueCommentCommand,
 	},
 }
 

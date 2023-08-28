@@ -87,11 +87,7 @@ func runReport(ctx *cli.Context) error {
 	for _, path := range ctx.Args().Slice() {
 		fmt.Println()
 		fmt.Println("##", path)
-		snapshotJSON, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		snapshot, err := github.ParseIssues(snapshotJSON)
+		snapshot, err := readIssues(path)
 		if err != nil {
 			return err
 		}
@@ -105,6 +101,14 @@ func runReport(ctx *cli.Context) error {
 		printSummary(report.Abstract(), opts)
 	}
 	return nil
+}
+
+func readIssues(path string) (map[int]github.Issue, error) {
+	snapshotJSON, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return github.ParseIssues(snapshotJSON)
 }
 
 func printTimeFrame(timeFrame analysis.TimeFrame) {
@@ -184,7 +188,11 @@ func printIssueSummary(summary *analysis.IssueSummary, opts printSummaryOptions)
 			})
 			table := markdown.NewTable("#Issue", "Duration", "Title")
 			for _, issue := range sortedIssues {
-				table.AddRow(issue.Value.Number, formatDuration(issue.Value.Duration()), issue.Value.Title)
+				table.AddRow(
+					fmt.Sprintf("#%d", issue.Value.Number),
+					formatDuration(issue.Value.Duration()),
+					issue.Value.Title,
+				)
 			}
 			fmt.Println()
 			table.Print(os.Stdout)
