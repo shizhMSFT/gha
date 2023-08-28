@@ -13,3 +13,8 @@ func (s Set[T]) Add(v T) {
 func (s Set[T]) Len() int {
 	return len(s)
 }
+
+func (s Set[T]) Contains(v T) bool {
+	_, ok := s[v]
+	return ok
+}

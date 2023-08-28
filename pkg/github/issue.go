@@ -127,3 +127,18 @@ func DiffIssues(old, head map[int]Issue) map[int]diff.Diff[Issue] {
 	}
 	return diffs
 }
+
+type IssueComment struct {
+	ID        int       `json:"id"`
+	User      Account   `json:"user"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func ParseIssueComments(jsonBytes []byte) (map[int][]IssueComment, error) {
+	var comments map[int][]IssueComment
+	if err := json.Unmarshal(jsonBytes, &comments); err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
