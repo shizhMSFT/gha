@@ -121,7 +121,7 @@ Fetching comments of 264 issues since 2023-01-01...
 ..................................................  94.69%
 ..............                                     100.00%
 Saved issue comments to notaryproject_notation_20230828_094020_comments.json
-$ # Download CODEOWNERS or MAINTAINERS. Both works.
+$ # Download CODEOWNERS or MAINTAINERS. Both work.
 $ wget https://raw.githubusercontent.com/notaryproject/notation/main/MAINTAINERS
 --2023-08-28 23:10:54--  https://raw.githubusercontent.com/notaryproject/notation/main/MAINTAINERS
 Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.109.133, 185.199.110.133, 185.199.111.133, ...
