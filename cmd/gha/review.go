@@ -60,7 +60,7 @@ func runPullRequestReview(ctx *cli.Context) error {
 
 	// generate report
 	fmt.Println("Pull Request Review Count")
-	fmt.Println("==========================")
+	fmt.Println("=========================")
 	printTimeFrame(timeFrame)
 	report := analysis.NewPullRequestReviewReport(timeFrame)
 	for _, path := range ctx.Args().Slice() {
