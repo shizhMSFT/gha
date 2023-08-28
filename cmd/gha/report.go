@@ -1,9 +1,11 @@
 package main
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/shizhMSFT/gha/pkg/analysis"
@@ -148,7 +150,7 @@ func printIssueSummary(summary *analysis.IssueSummary, opts printSummaryOptions)
 	fmt.Println("  - Open:", summary.Open)
 	fmt.Println("  - Closed:", summary.Closed)
 	if len(summary.Durations) > 0 {
-		sort.Sort(summary.Durations)
+		slices.Sort(summary.Durations)
 		fmt.Println("- Time to close:")
 		fmt.Println("  - Min:", formatDuration(math.Min(summary.Durations)))
 		fmt.Println("  - Max:", formatDuration(math.Max(summary.Durations)))
@@ -177,8 +179,8 @@ func printIssueSummary(summary *analysis.IssueSummary, opts printSummaryOptions)
 			fmt.Println("No issues out of SLA:", opts.issueSLA, "days")
 		} else {
 			fmt.Println(len(issues), "issues out of SLA:", opts.issueSLA, "days")
-			sortedIssues := sort.SliceFromMap(issues).Sort(func(s []sort.MapEntry[int, github.Issue], i, j int) bool {
-				return s[i].Value.Duration() > s[j].Value.Duration()
+			sortedIssues := sort.SliceFromMap(issues).Sort(func(a, b sort.MapEntry[int, github.Issue]) int {
+				return cmp.Compare(b.Value.Duration(), a.Value.Duration())
 			})
 			table := markdown.NewTable("#Issue", "Duration", "Title")
 			for _, issue := range sortedIssues {
@@ -197,7 +199,7 @@ func printPullRequestSummary(summary *analysis.PullRequestSummary, opts printSum
 	fmt.Println("  - Closed:", summary.Closed)
 	fmt.Println("  - Merged:", summary.Merged)
 	if len(summary.Durations) > 0 {
-		sort.Sort(summary.Durations)
+		slices.Sort(summary.Durations)
 		fmt.Println("- Time to merge:")
 		fmt.Println("  - Min:", formatDuration(math.Min(summary.Durations)))
 		fmt.Println("  - Max:", formatDuration(math.Max(summary.Durations)))
@@ -229,8 +231,8 @@ func printPullRequestSummary(summary *analysis.PullRequestSummary, opts printSum
 			fmt.Println("No pull requests out of SLA:", opts.pullRequestSLA, "days")
 		} else {
 			fmt.Println(len(pullRequests), "pull requests out of SLA:", opts.pullRequestSLA, "days")
-			sortedPullRequests := sort.SliceFromMap(pullRequests).Sort(func(s []sort.MapEntry[int, github.Issue], i, j int) bool {
-				return s[i].Value.Duration() > s[j].Value.Duration()
+			sortedPullRequests := sort.SliceFromMap(pullRequests).Sort(func(a, b sort.MapEntry[int, github.Issue]) int {
+				return cmp.Compare(b.Value.Duration(), a.Value.Duration())
 			})
 			table := markdown.NewTable("#PR", "Duration", "Title")
 			for _, pullRequest := range sortedPullRequests {
@@ -261,8 +263,8 @@ func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
 		}
 		issueCounts[author] += summary.Issue.Total
 	}
-	counts := sort.SliceFromMap(issueCounts).Sort(func(s []sort.MapEntry[string, int], i, j int) bool {
-		return s[i].Value > s[j].Value
+	counts := sort.SliceFromMap(issueCounts).Sort(func(a, b sort.MapEntry[string, int]) int {
+		return b.Value - a.Value
 	})
 
 	// print table
@@ -275,7 +277,7 @@ func printIssueSummaryTable(authors map[string]*analysis.RepositorySummary) {
 			continue
 		}
 
-		sort.Sort(summary.Durations)
+		slices.Sort(summary.Durations)
 		table.AddRow(author, summary.Total, summary.Open, summary.Closed,
 			formatDuration(math.Min(summary.Durations)),
 			formatDuration(math.Max(summary.Durations)),
@@ -297,8 +299,8 @@ func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary
 		}
 		prCounts[author] += summary.PullRequest.Total
 	}
-	counts := sort.SliceFromMap(prCounts).Sort(func(s []sort.MapEntry[string, int], i, j int) bool {
-		return s[i].Value > s[j].Value
+	counts := sort.SliceFromMap(prCounts).Sort(func(a, b sort.MapEntry[string, int]) int {
+		return b.Value - a.Value
 	})
 
 	// print table
@@ -311,7 +313,7 @@ func printPullRequestSummaryTable(authors map[string]*analysis.RepositorySummary
 			continue
 		}
 
-		sort.Sort(summary.Durations)
+		slices.Sort(summary.Durations)
 		table.AddRow(author, summary.Total, summary.Open, summary.Closed, summary.Merged,
 			formatDuration(math.Min(summary.Durations)),
 			formatDuration(math.Max(summary.Durations)),

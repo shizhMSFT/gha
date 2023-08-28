@@ -1,6 +1,6 @@
 package sort
 
-import "sort"
+import "slices"
 
 type MapEntry[K comparable, V any] struct {
 	Key   K
@@ -9,10 +9,8 @@ type MapEntry[K comparable, V any] struct {
 
 type MapEntrySlice[K comparable, V any] []MapEntry[K, V]
 
-func (s MapEntrySlice[K, V]) Sort(less func(s []MapEntry[K, V], i, j int) bool) MapEntrySlice[K, V] {
-	sort.Slice(s, func(i, j int) bool {
-		return less(s, i, j)
-	})
+func (s MapEntrySlice[K, V]) Sort(cmp func(a, b MapEntry[K, V]) int) MapEntrySlice[K, V] {
+	slices.SortFunc(s, cmp)
 	return s
 }
 

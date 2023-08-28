@@ -86,8 +86,8 @@ func runPullRequestReview(ctx *cli.Context) error {
 
 func printPullRequestReviewCount(reviewCounts map[string]int) {
 	// sort by review counts
-	counts := sort.SliceFromMap(reviewCounts).Sort(func(s []sort.MapEntry[string, int], i, j int) bool {
-		return s[i].Value > s[j].Value
+	counts := sort.SliceFromMap(reviewCounts).Sort(func(a, b sort.MapEntry[string, int]) int {
+		return b.Value - a.Value
 	})
 
 	// print table
